@@ -1,0 +1,43 @@
+*jwc* is a minimalist floating/tiling [[http://wayland.freedesktop.org/][Wayland]] compositor based on [[https://github.com/swaywm/wlroots][wlroots]].
+
+It has been designed for my needs, there is no arguments options, configuration file ...
+
+Feel free to use/hack it :)
+
+** Building and Running
+
+Install dependencies:
+- wayland
+- [[https://github.com/swaywm/wlroots][wlroots]]
+
+#+BEGIN_SRC shell
+make
+./jwc
+#+END_SRC
+
+
+** Tips
+Grant permission when executing *jwc* from tty:
+#+BEGIN_SRC shell
+sudo chown root jwc && sudo chmod u+s jwc
+#+END_SRC
+
+Set environment vars to use wayland backend:
+#+BEGIN_SRC shell
+export GDK_BACKEND=wayland CLUTTER_BACKEND=wayland
+#+END_SRC
+
+Compile gtk+ from source with wayland backend
+#+BEGIN_SRC shell
+./autogen.sh --enable-wayland-backend --enable-x11-backend
+#+END_SRC
+
+Set gtk theme with environment var:
+#+BEGIN_SRC shell
+export GTK_THEME=Adwaita:dark
+#+END_SRC
+
+Get ouputs configuration (equivalent of xrandr):
+#+BEGIN_SRC shell
+swaymsg -t get_outputs
+#+END_SRC

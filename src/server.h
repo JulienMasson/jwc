@@ -1,0 +1,52 @@
+/*
+ * This file is part of the jwm distribution:
+ * https://github.com/JulienMasson/jwc
+ *
+ * Copyright (c) 2018 Julien Masson.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef SERVER_H
+#define SERVER_H
+
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <wayland-server.h>
+#include <wlr/backend.h>
+#include <wlr/types/wlr_matrix.h>
+#include <wlr/types/wlr_output_layout.h>
+#include <wlr/types/wlr_xdg_output_v1.h>
+#include <wlr/render/wlr_renderer.h>
+#include <wlr/util/log.h>
+
+struct jwc_server {
+	/* Wayland resources */
+	struct wl_display *wl_display;
+	struct wl_event_loop *wl_event_loop;
+
+	/* wlroots resources */
+	struct wlr_backend *backend;
+	struct wlr_renderer *renderer;
+
+	/* Output resources */
+	struct wlr_output_layout *output_layout;
+	struct wl_list outputs;
+	struct wl_listener new_output;
+};
+
+extern struct jwc_server server;
+
+#endif
