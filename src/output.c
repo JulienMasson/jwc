@@ -32,12 +32,15 @@ static void output_frame(struct wl_listener *listener, void *data)
 	struct jwc_output *output = wl_container_of(listener, output, frame);
 	struct wlr_renderer *renderer = output->server->renderer;
 
+	/* get current time */
 	struct timespec now;
 	clock_gettime(CLOCK_MONOTONIC, &now);
 
-	if (!wlr_output_make_current(output->wlr_output, NULL)) {
+	/* make the output rendering context current */
+	if (!wlr_output_make_current(output->wlr_output, NULL))
 		return;
-	}
+
+	/* start rendering on all output frame*/
 	int width, height;
 	wlr_output_effective_resolution(output->wlr_output, &width, &height);
 	wlr_renderer_begin(renderer, width, height);
@@ -49,6 +52,7 @@ static void output_frame(struct wl_listener *listener, void *data)
 	/* update all client's surface of this output */
 	client_update_all_surface(&output->server->clients, output->wlr_output, &now);
 
+	/* Finish rendering and swap buffers */
 	wlr_renderer_end(renderer);
 	wlr_output_swap_buffers(output->wlr_output, NULL, NULL);
 }
@@ -58,14 +62,24 @@ void output_notify_new(struct wl_listener *listener, void *data)
 	struct jwc_server *server = wl_container_of(listener, server, new_output);
 	struct wlr_output *wlr_output = data;
 
+	wlr_log(WLR_INFO, "New output: %s %dx%d", wlr_output->name, wlr_output->width,
+		wlr_output->height);
+
+	/* create new output */
 	struct jwc_output *output = calloc(1, sizeof(struct jwc_output));
 	output->wlr_output = wlr_output;
 	output->server = server;
+
+	/* register callback when we get frame events from this output */
 	output->frame.notify = output_frame;
 	wl_signal_add(&wlr_output->events.frame, &output->frame);
+
+	/* add this output to the outputs server list */
 	wl_list_insert(&server->outputs, &output->link);
 
+	/* add an auto configured output to the layout */
 	wlr_output_layout_add_auto(server->output_layout, wlr_output);
 
+	/* create a global of this output */
 	wlr_output_create_global(wlr_output);
 }
