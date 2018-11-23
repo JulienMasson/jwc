@@ -42,7 +42,8 @@ static void output_frame(struct wl_listener *listener, void *data)
 	wlr_output_effective_resolution(output->wlr_output, &width, &height);
 	wlr_renderer_begin(renderer, width, height);
 
-	float color[4] = {0.3, 0.3, 0.3, 1.0};
+	/* default color in background */
+	float color[4] = {0.2, 0.2, 0.2, 1.0};
 	wlr_renderer_clear(renderer, color);
 
 	/* update all client's surface of this output */
