@@ -18,6 +18,7 @@
  */
 
 #include "output.h"
+#include "client.h"
 
 struct jwc_output {
 	struct wl_list link;
@@ -43,6 +44,9 @@ static void output_frame(struct wl_listener *listener, void *data)
 
 	float color[4] = {0.3, 0.3, 0.3, 1.0};
 	wlr_renderer_clear(renderer, color);
+
+	/* update all client's surface of this output */
+	client_update_all_surface(&output->server->clients, output->wlr_output, &now);
 
 	wlr_renderer_end(renderer);
 	wlr_output_swap_buffers(output->wlr_output, NULL, NULL);

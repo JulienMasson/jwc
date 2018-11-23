@@ -1,3 +1,4 @@
 jwc
 obj/*.o
 cscope.*
+protocols/*.h

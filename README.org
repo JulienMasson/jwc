@@ -8,6 +8,7 @@ Feel free to use/hack it :)
 
 Install dependencies:
 - wayland
+- wayland-protocols
 - [[https://github.com/swaywm/wlroots][wlroots]]
 
 #+BEGIN_SRC shell

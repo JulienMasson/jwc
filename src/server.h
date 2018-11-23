@@ -24,11 +24,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <wayland-server.h>
 #include <wlr/backend.h>
 #include <wlr/types/wlr_matrix.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
+#include <wlr/types/wlr_compositor.h>
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/util/log.h>
 
@@ -45,6 +47,10 @@ struct jwc_server {
 	struct wlr_output_layout *output_layout;
 	struct wl_list outputs;
 	struct wl_listener new_output;
+
+	/* clients resources */
+	struct wl_list clients;
+	struct wl_listener new_client;
 };
 
 extern struct jwc_server server;

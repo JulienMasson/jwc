@@ -19,6 +19,7 @@
 
 #include "server.h"
 #include "output.h"
+#include "client.h"
 
 struct jwc_server server;
 
@@ -60,7 +61,14 @@ int main(void)
 	server.new_output.notify = output_notify_new;
 	wl_signal_add(&server.backend->events.new_output, &server.new_output);
 	server.output_layout = wlr_output_layout_create();
-	
+
+	/* init server: clients */
+	wl_list_init(&server.clients);
+	client_init(&server);
+
+	/* create wlroots compositor */
+	wlr_compositor_create(server.wl_display, server.renderer);
+
 	/* open wayland socket */
 	const char *socket = wl_display_add_socket_auto(server.wl_display);
 	if (!socket) {
