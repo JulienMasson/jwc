@@ -20,6 +20,7 @@
 #include "server.h"
 #include "output.h"
 #include "client.h"
+#include "cursor.h"
 
 struct jwc_server server;
 
@@ -36,6 +37,15 @@ static void redirect_stdio(void)
 	/* redirect stderr */
 	freopen(log_file, "a", stderr);
 	setbuf(stderr, NULL);
+}
+
+static void server_new_input(struct wl_listener *listener, void *data)
+{
+	struct jwc_server *server = wl_container_of(listener, server, new_input);
+	struct wlr_input_device *device = data;
+
+	if (device->type == WLR_INPUT_DEVICE_POINTER)
+		wlr_cursor_attach_input_device(server->cursor, device);
 }
 
 int main(void)
@@ -61,6 +71,17 @@ int main(void)
 	server.new_output.notify = output_notify_new;
 	wl_signal_add(&server.backend->events.new_output, &server.new_output);
 	server.output_layout = wlr_output_layout_create();
+
+	/* init server: cursor */
+	server.cursor = wlr_cursor_create();
+	wlr_cursor_attach_output_layout(server.cursor, server.output_layout);
+	server.cursor_mgr = wlr_xcursor_manager_create(NULL, 24);
+	wlr_xcursor_manager_load(server.cursor_mgr, 1);
+	cursor_init();
+
+	/* init server: input */
+	server.new_input.notify = server_new_input;
+	wl_signal_add(&server.backend->events.new_input, &server.new_input);
 
 	/* init server: clients */
 	wl_list_init(&server.clients);
