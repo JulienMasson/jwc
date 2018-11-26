@@ -69,6 +69,13 @@ static void output_notify_new(struct wl_listener *listener, void *data)
 	struct jwc_server *server = wl_container_of(listener, server, new_output);
 	struct wlr_output *wlr_output = data;
 
+	/* set default Modesetting */
+	if (!wl_list_empty(&wlr_output->modes)) {
+		struct wlr_output_mode *mode =
+			wl_container_of(wlr_output->modes.prev, mode, link);
+		wlr_output_set_mode(wlr_output, mode);
+	}
+
 	wlr_log(WLR_INFO, "New output: %s %dx%d", wlr_output->name, wlr_output->width,
 		wlr_output->height);
 
@@ -84,8 +91,13 @@ static void output_notify_new(struct wl_listener *listener, void *data)
 	/* add this output to the outputs server list */
 	wl_list_insert(&server->outputs, &output->link);
 
-	/* add an auto configured output to the layout */
-	wlr_output_layout_add_auto(server->output_layout, wlr_output);
+	/* Set custom layout otherwise add an auto configured output to the layout */
+	if (!strcmp(wlr_output->name, "eDP-1"))
+		wlr_output_layout_add(server->output_layout, wlr_output, 2560, 0);
+	else if (!strcmp(wlr_output->name, "HDMI-A-1"))
+		wlr_output_layout_add(server->output_layout, wlr_output, 0, 0);
+	else
+		wlr_output_layout_add_auto(server->output_layout, wlr_output);
 
 	/* create a global of this output */
 	wlr_output_create_global(wlr_output);
@@ -99,5 +111,6 @@ void output_init(struct jwc_server *server)
 	server->new_output.notify = output_notify_new;
 	wl_signal_add(&server->backend->events.new_output, &server->new_output);
 
+	/* create layout, it will be used to describe how the screens are organized */
 	server->output_layout = wlr_output_layout_create();
 }
