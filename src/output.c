@@ -21,10 +21,17 @@
 #include "client.h"
 
 struct jwc_output {
-	struct wl_list link;
+	/* pointer to compositor server */
 	struct jwc_server *server;
-	struct wlr_output *wlr_output;
+
+	/* index in outputs list */
+	struct wl_list link;
+
+	/* Wayland listeners */
 	struct wl_listener frame;
+
+	/* output ressources */
+	struct wlr_output *wlr_output;
 };
 
 static void output_frame(struct wl_listener *listener, void *data)
@@ -88,6 +95,7 @@ void output_init(struct jwc_server *server)
 {
 	wl_list_init(&server->outputs);
 
+	/* register callback when we have new output */
 	server->new_output.notify = output_notify_new;
 	wl_signal_add(&server->backend->events.new_output, &server->new_output);
 

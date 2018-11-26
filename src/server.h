@@ -45,6 +45,7 @@ struct jwc_server {
 	/* wlroots resources */
 	struct wlr_backend *backend;
 	struct wlr_renderer *renderer;
+	struct wlr_seat *seat;
 
 	/* Output resources */
 	struct wlr_output_layout *output_layout;
@@ -58,6 +59,9 @@ struct jwc_server {
 	struct wlr_cursor *cursor;
 	struct wlr_xcursor_manager *cursor_mgr;
 	struct wl_listener cursor_motion_absolute;
+
+	/* keyboard ressources */
+	struct wl_list keyboards;
 
 	/* clients resources */
 	struct wl_list clients;

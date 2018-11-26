@@ -18,9 +18,10 @@
  */
 
 #include "client.h"
+#include "keyboard.h"
 
 struct jwc_client {
-	/* pointer to global data structure (server) */
+	/* pointer to compositor server */
 	struct jwc_server *server;
 
 	/* index in clients list */
@@ -48,10 +49,22 @@ struct render_data {
 	struct timespec *when;
 };
 
+static void client_focus(struct jwc_client *client)
+{
+	struct wlr_seat *seat = client->server->seat;
+	struct wlr_xdg_surface_v6 *xdg_surface = client->xdg_surface;
+	struct wlr_surface *surface = xdg_surface->surface;
+
+	wlr_xdg_toplevel_v6_set_activated(xdg_surface, true);
+
+	keyboard_enter(seat, surface);
+}
+
 static void xdg_surface_map(struct wl_listener *listener, void *data)
 {
 	struct jwc_client *client = wl_container_of(listener, client, map);
 	client->mapped = true;
+	client_focus(client);
 }
 
 static void xdg_surface_unmap(struct wl_listener *listener, void *data)

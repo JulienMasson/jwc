@@ -17,19 +17,24 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CURSOR_H
-#define CURSOR_H
+#ifndef KEYBOARD_H
+#define KEYBOARD_H
 
 #include "server.h"
 
 /**
  * TODO
  */
-void cursor_init(struct jwc_server *server);
+void keyboard_init(struct jwc_server *server);
 
 /**
  * TODO
  */
-void cursor_new(struct jwc_server *server, struct wlr_input_device *device);
+void keyboard_new(struct jwc_server *server, struct wlr_input_device *device);
+
+/**
+ * TODO
+ */
+void keyboard_enter(struct wlr_seat *seat, struct wlr_surface *surface);
 
 #endif

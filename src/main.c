@@ -21,6 +21,7 @@
 #include "output.h"
 #include "input.h"
 #include "cursor.h"
+#include "keyboard.h"
 #include "client.h"
 
 static void redirect_stdio(void)
@@ -38,6 +39,26 @@ static void redirect_stdio(void)
 	setbuf(stderr, NULL);
 }
 
+static void wlroots_init(struct jwc_server *server)
+{
+	/* automatically initializes the most suitable backend */
+	server->backend = wlr_backend_autocreate(server->wl_display, NULL);
+	assert(server->backend);
+
+	/* get the renderer of the backend used */
+	server->renderer = wlr_backend_get_renderer(server->backend);
+	assert(server->renderer);
+
+	/* init the wayland display from the renderer */
+	wlr_renderer_init_wl_display(server->renderer, server->wl_display);
+
+	/* allocate new compositor and add global to the display*/
+	wlr_compositor_create(server->wl_display, server->renderer);
+
+	/* allocate new seat and add global to the display*/
+	server->seat = wlr_seat_create(server->wl_display, "seat0");
+}
+
 int main(void)
 {
 	struct jwc_server server;
@@ -46,26 +67,20 @@ int main(void)
 	redirect_stdio();
 	wlr_log_init(WLR_INFO, NULL);
 
-	/* init server: wayland ressources */
+	/* init server: wayland */
 	server.wl_display = wl_display_create();
 	server.wl_event_loop = wl_display_get_event_loop(server.wl_display);
 	assert(server.wl_display && server.wl_event_loop);
 
-	/* init server: wlroots resources */
-	server.backend = wlr_backend_autocreate(server.wl_display, NULL);
-	assert(server.backend);
-	server.renderer = wlr_backend_get_renderer(server.backend);
-	assert(server.renderer);
-	wlr_renderer_init_wl_display(server.renderer, server.wl_display);
+	/* init server: wlroots */
+	wlroots_init(&server);
 
-	/* init modules */
+	/* init server: modules */
 	output_init(&server);
 	input_init(&server);
 	cursor_init(&server);
+	keyboard_init(&server);
 	client_init(&server);
-
-	/* create wlroots compositor */
-	wlr_compositor_create(server.wl_display, server.renderer);
 
 	/* open wayland socket */
 	const char *socket = wl_display_add_socket_auto(server.wl_display);

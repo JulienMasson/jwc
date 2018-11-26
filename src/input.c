@@ -18,18 +18,40 @@
  */
 
 #include "input.h"
+#include "cursor.h"
+#include "keyboard.h"
 
 static void new_input(struct wl_listener *listener, void *data)
 {
 	struct jwc_server *server = wl_container_of(listener, server, new_input);
 	struct wlr_input_device *device = data;
+	static uint32_t caps;
 
-	if (device->type == WLR_INPUT_DEVICE_POINTER)
-		wlr_cursor_attach_input_device(server->cursor, device);
+	switch (device->type) {
+
+	case WLR_INPUT_DEVICE_KEYBOARD:
+		/* new keyboard detected */
+		keyboard_new(server, device);
+		caps |= WL_SEAT_CAPABILITY_KEYBOARD;
+		break;
+
+	case WLR_INPUT_DEVICE_POINTER:
+		/* new cursor detected */
+		cursor_new(server, device);
+		caps |= WL_SEAT_CAPABILITY_POINTER;
+		break;
+
+	default:
+		break;
+	}
+
+	/* updates the capabilities available on this seat */
+	wlr_seat_set_capabilities(server->seat, caps);
 }
 
 void input_init(struct jwc_server *server)
 {
+	/* register callback when we get new input */
 	server->new_input.notify = new_input;
 	wl_signal_add(&server->backend->events.new_input, &server->new_input);
 }

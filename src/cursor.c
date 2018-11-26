@@ -45,3 +45,9 @@ void cursor_init(struct jwc_server *server)
 	wl_signal_add(&server->cursor->events.motion_absolute,
 		      &server->cursor_motion_absolute);
 }
+
+void cursor_new(struct jwc_server *server, struct wlr_input_device *device)
+{
+	/* attaches this input device to the cursor */
+	wlr_cursor_attach_input_device(server->cursor, device);
+}

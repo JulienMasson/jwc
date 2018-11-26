@@ -9,7 +9,8 @@ LDFLAGS :=
 
 # libs and include
 pkg_configs := wayland-server \
-               wlroots
+               wlroots \
+               xkbcommon
 
 LIBS := $(shell pkg-config --libs   ${pkg_configs})
 INCS := $(shell pkg-config --cflags ${pkg_configs})
