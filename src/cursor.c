@@ -24,6 +24,15 @@ static void process_cursor_motion(struct jwc_server *server, uint32_t time)
 	wlr_xcursor_manager_set_cursor_image(server->cursor_mgr, "left_ptr", server->cursor);
 }
 
+static void server_cursor_motion(struct wl_listener *listener, void *data) {
+	struct jwc_server *server = wl_container_of(listener, server, cursor_motion);
+	struct wlr_event_pointer_motion *event = data;
+
+	wlr_cursor_move(server->cursor, event->device, event->delta_x, event->delta_y);
+
+	process_cursor_motion(server, event->time_msec);
+}
+
 static void cursor_motion_absolute(struct wl_listener *listener, void *data)
 {
 	struct jwc_server *server = wl_container_of(listener, server, cursor_motion_absolute);
@@ -37,10 +46,19 @@ static void cursor_motion_absolute(struct wl_listener *listener, void *data)
 void cursor_init(struct jwc_server *server)
 {
 	server->cursor = wlr_cursor_create();
+
+	/* attach the created cursor to the layout */
 	wlr_cursor_attach_output_layout(server->cursor, server->output_layout);
+
+	/* creates a new XCursor manager (size 24) and load it */
 	server->cursor_mgr = wlr_xcursor_manager_create(NULL, 24);
 	wlr_xcursor_manager_load(server->cursor_mgr, 1);
 
+	/* register callback when we receive relative motion event */
+	server->cursor_motion.notify = server_cursor_motion;
+	wl_signal_add(&server->cursor->events.motion, &server->cursor_motion);
+
+	/* register callback when we receive absolute motion event */
 	server->cursor_motion_absolute.notify = cursor_motion_absolute;
 	wl_signal_add(&server->cursor->events.motion_absolute,
 		      &server->cursor_motion_absolute);

@@ -58,6 +58,7 @@ struct jwc_server {
 	/* cursor ressources */
 	struct wlr_cursor *cursor;
 	struct wlr_xcursor_manager *cursor_mgr;
+	struct wl_listener cursor_motion;
 	struct wl_listener cursor_motion_absolute;
 
 	/* keyboard ressources */
