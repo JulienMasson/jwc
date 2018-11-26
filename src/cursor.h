@@ -23,8 +23,8 @@
 #include "server.h"
 
 /**
- * Register callback for differents cursor signal
+ * TODO
  */
-void cursor_init(void);
+void cursor_init(struct jwc_server *server);
 
 #endif

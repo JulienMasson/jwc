@@ -17,14 +17,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OUTPUT_H
-#define OUTPUT_H
+#include "input.h"
 
-#include "server.h"
+static void new_input(struct wl_listener *listener, void *data)
+{
+	struct jwc_server *server = wl_container_of(listener, server, new_input);
+	struct wlr_input_device *device = data;
 
-/**
- * TODO
- */
-void output_init(struct jwc_server *server);
+	if (device->type == WLR_INPUT_DEVICE_POINTER)
+		wlr_cursor_attach_input_device(server->cursor, device);
+}
 
-#endif
+void input_init(struct jwc_server *server)
+{
+	server->new_input.notify = new_input;
+	wl_signal_add(&server->backend->events.new_input, &server->new_input);
+}

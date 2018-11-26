@@ -17,7 +17,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <wlr/types/wlr_xdg_shell_v6.h>
 #include "client.h"
 
 struct jwc_client {
@@ -42,24 +41,12 @@ struct jwc_client {
 	int x, y;
 };
 
-struct protocol_backend {
-	/* pointer to global data structure (server) */
-	struct jwc_server *server;
-
-	/* xdg shell v6 resources */
-	struct wlr_xdg_shell_v6 *xdg_shell_v6;
-	struct wl_listener xdg_shell_v6_surface;
-};
-
 struct render_data {
 	struct wlr_output *output;
 	struct wlr_renderer *renderer;
 	struct jwc_client *client;
 	struct timespec *when;
 };
-
-/* internal data */
-static struct protocol_backend client_backend;
 
 static void xdg_surface_map(struct wl_listener *listener, void *data)
 {
@@ -123,9 +110,8 @@ static void render_surface(struct wlr_surface *surface, int sx, int sy, void *da
 
 static void client_notify_new(struct wl_listener *listener, void *data)
 {
-	struct protocol_backend *client_backend =
-		wl_container_of(listener, client_backend, xdg_shell_v6_surface);
-	struct jwc_server *server = client_backend->server;
+	struct jwc_server *server =
+		wl_container_of(listener, server, xdg_shell_v6_surface);
 	struct wlr_xdg_surface_v6 *xdg_surface = data;
 
 	/* only toplevel surface are accepted */
@@ -160,15 +146,15 @@ static void client_notify_new(struct wl_listener *listener, void *data)
 
 void client_init(struct jwc_server *server)
 {
-	client_backend.server = server;
+	wl_list_init(&server->clients);
 
 	/* create xdg shell v6 wayland protocol */
-	client_backend.xdg_shell_v6 = wlr_xdg_shell_v6_create(server->wl_display);
+	server->xdg_shell_v6 = wlr_xdg_shell_v6_create(server->wl_display);
 
 	/* register callback when we have a new client */
-	client_backend.xdg_shell_v6_surface.notify = client_notify_new;
-	wl_signal_add(&client_backend.xdg_shell_v6->events.new_surface,
-		      &client_backend.xdg_shell_v6_surface);
+	server->xdg_shell_v6_surface.notify = client_notify_new;
+	wl_signal_add(&server->xdg_shell_v6->events.new_surface,
+		      &server->xdg_shell_v6_surface);
 }
 
 void client_update_all_surface(struct wl_list *clients, struct wlr_output *output,

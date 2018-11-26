@@ -24,7 +24,7 @@ static void process_cursor_motion(struct jwc_server *server, uint32_t time)
 	wlr_xcursor_manager_set_cursor_image(server->cursor_mgr, "left_ptr", server->cursor);
 }
 
-static void server_cursor_motion_absolute(struct wl_listener *listener, void *data)
+static void cursor_motion_absolute(struct wl_listener *listener, void *data)
 {
 	struct jwc_server *server = wl_container_of(listener, server, cursor_motion_absolute);
 	struct wlr_event_pointer_motion_absolute *event = data;
@@ -34,9 +34,14 @@ static void server_cursor_motion_absolute(struct wl_listener *listener, void *da
 	process_cursor_motion(server, event->time_msec);
 }
 
-void cursor_init(void)
+void cursor_init(struct jwc_server *server)
 {
-	server.cursor_motion_absolute.notify = server_cursor_motion_absolute;
-	wl_signal_add(&server.cursor->events.motion_absolute,
-		      &server.cursor_motion_absolute);
+	server->cursor = wlr_cursor_create();
+	wlr_cursor_attach_output_layout(server->cursor, server->output_layout);
+	server->cursor_mgr = wlr_xcursor_manager_create(NULL, 24);
+	wlr_xcursor_manager_load(server->cursor_mgr, 1);
+
+	server->cursor_motion_absolute.notify = cursor_motion_absolute;
+	wl_signal_add(&server->cursor->events.motion_absolute,
+		      &server->cursor_motion_absolute);
 }

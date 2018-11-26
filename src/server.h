@@ -27,13 +27,14 @@
 #include <unistd.h>
 #include <wayland-server.h>
 #include <wlr/backend.h>
+#include <wlr/render/wlr_renderer.h>
+#include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_matrix.h>
 #include <wlr/types/wlr_output_layout.h>
-#include <wlr/types/wlr_xdg_output_v1.h>
-#include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_xcursor_manager.h>
-#include <wlr/render/wlr_renderer.h>
+#include <wlr/types/wlr_xdg_output_v1.h>
+#include <wlr/types/wlr_xdg_shell_v6.h>
 #include <wlr/util/log.h>
 
 struct jwc_server {
@@ -50,19 +51,19 @@ struct jwc_server {
 	struct wl_list outputs;
 	struct wl_listener new_output;
 
+	/* input ressources */
+	struct wl_listener new_input;
+
 	/* cursor ressources */
 	struct wlr_cursor *cursor;
 	struct wlr_xcursor_manager *cursor_mgr;
 	struct wl_listener cursor_motion_absolute;
 
-	/* input ressources */
-	struct wl_listener new_input;
-
 	/* clients resources */
 	struct wl_list clients;
+	struct wlr_xdg_shell_v6 *xdg_shell_v6;
+	struct wl_listener xdg_shell_v6_surface;
 	struct wl_listener new_client;
 };
-
-extern struct jwc_server server;
 
 #endif

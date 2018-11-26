@@ -57,7 +57,7 @@ static void output_frame(struct wl_listener *listener, void *data)
 	wlr_output_swap_buffers(output->wlr_output, NULL, NULL);
 }
 
-void output_notify_new(struct wl_listener *listener, void *data)
+static void output_notify_new(struct wl_listener *listener, void *data)
 {
 	struct jwc_server *server = wl_container_of(listener, server, new_output);
 	struct wlr_output *wlr_output = data;
@@ -82,4 +82,14 @@ void output_notify_new(struct wl_listener *listener, void *data)
 
 	/* create a global of this output */
 	wlr_output_create_global(wlr_output);
+}
+
+void output_init(struct jwc_server *server)
+{
+	wl_list_init(&server->outputs);
+
+	server->new_output.notify = output_notify_new;
+	wl_signal_add(&server->backend->events.new_output, &server->new_output);
+
+	server->output_layout = wlr_output_layout_create();
 }

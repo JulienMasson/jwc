@@ -17,14 +17,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OUTPUT_H
-#define OUTPUT_H
+#ifndef INPUT_H
+#define INPUT_H
 
 #include "server.h"
 
 /**
  * TODO
  */
-void output_init(struct jwc_server *server);
+void input_init(struct jwc_server *server);
 
 #endif
