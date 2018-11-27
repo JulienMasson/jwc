@@ -20,28 +20,6 @@
 #include "client.h"
 #include "keyboard.h"
 
-struct jwc_client {
-	/* pointer to compositor server */
-	struct jwc_server *server;
-
-	/* index in clients list */
-	struct wl_list link;
-
-	/* xdg shell v6 surface */
-	struct wlr_xdg_surface_v6 *xdg_surface;
-
-	/* Wayland listeners */
-	struct wl_listener map;
-	struct wl_listener unmap;
-	struct wl_listener destroy;
-	struct wl_listener request_move;
-	struct wl_listener request_resize;
-
-	/* client ressources */
-	bool mapped;
-	int x, y;
-};
-
 struct render_data {
 	struct wlr_output *output;
 	struct wlr_renderer *renderer;
@@ -74,7 +52,9 @@ static void xdg_surface_unmap(struct wl_listener *listener, void *data)
 
 static void xdg_surface_destroy(struct wl_listener *listener, void *data)
 {
-	/* TODO */
+	struct jwc_client *client = wl_container_of(listener, client, destroy);
+	wl_list_remove(&client->link);
+	free(client);
 }
 
 static void xdg_toplevel_request_move(struct wl_listener *listener, void *data)
@@ -168,6 +148,34 @@ void client_init(struct jwc_server *server)
 	server->xdg_shell_v6_surface.notify = client_notify_new;
 	wl_signal_add(&server->xdg_shell_v6->events.new_surface,
 		      &server->xdg_shell_v6_surface);
+}
+
+struct jwc_client *client_get_focus(struct jwc_server *server)
+{
+	double cursor_x = server->cursor->x;
+	double cursor_y = server->cursor->y;
+	struct wl_list *clients = &server->clients;
+	struct jwc_client *client;
+	struct wlr_surface *surface;
+	double sx, sy;
+
+	wl_list_for_each(client, clients, link) {
+		surface = wlr_xdg_surface_v6_surface_at(client->xdg_surface,
+							cursor_x,
+							cursor_y,
+							&sx, &sy);
+		if (surface)
+			return client;
+	}
+
+	return NULL;
+}
+
+void client_close(struct jwc_client *client)
+{
+	struct wlr_xdg_surface_v6 *surface = client->xdg_surface;
+	if (surface)
+		wlr_xdg_surface_v6_send_close(surface);
 }
 
 void client_update_all_surface(struct wl_list *clients, struct wlr_output *output,
