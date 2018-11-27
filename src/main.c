@@ -45,6 +45,9 @@ static void wlroots_init(struct jwc_server *server)
 	server->backend = wlr_backend_autocreate(server->wl_display, NULL);
 	assert(server->backend);
 
+	/* create a wl data device manager global for this display */
+	wlr_data_device_manager_create(server->wl_display);
+
 	/* get the renderer of the backend used */
 	server->renderer = wlr_backend_get_renderer(server->backend);
 	assert(server->renderer);
