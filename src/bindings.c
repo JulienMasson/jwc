@@ -39,6 +39,7 @@ void bindings_cursor(struct jwc_server *server)
 
 bool bindings_keyboard(struct jwc_server *server, xkb_keysym_t syms)
 {
+	struct jwc_client *focus;
 	bool handle = true;
 
 	switch(syms) {
@@ -52,6 +53,12 @@ bool bindings_keyboard(struct jwc_server *server, xkb_keysym_t syms)
 			execl("/bin/sh", "/bin/sh", "-c", "weston-terminal", (void *)NULL);
 		}
 		break;
+
+	case XKB_KEY_c:
+		focus = client_get_focus(server);
+		if (focus != NULL)
+			client_close(focus);
+		return true;
 
 	default:
 		handle = false;
