@@ -1,6 +1,8 @@
-*jwc* is a minimalist floating/tiling [[http://wayland.freedesktop.org/][Wayland]] compositor based on [[https://github.com/swaywm/wlroots][wlroots]].
+*jwc* is a minimalist floating [[http://wayland.freedesktop.org/][Wayland]] compositor based on [[https://github.com/swaywm/wlroots][wlroots]].
 
-It has been designed for my needs, there is no arguments options, configuration file ...
+It has been designed for my needs (currently WIP).
+
+There is no arguments options, configuration file, all in the source code...
 
 Feel free to use/hack it :)
 
