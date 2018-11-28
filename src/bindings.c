@@ -20,21 +20,59 @@
 #include "bindings.h"
 #include "client.h"
 #include "output.h"
+#include "cursor.h"
 
-void bindings_cursor(struct jwc_server *server)
+bool bindings_cursor(struct jwc_server *server, double x, double y)
 {
+	struct jwc_client *focus;
+	struct wlr_box box;
+
 	if (server->meta_key_pressed) {
 
 		/* move client */
 		if (server->cursor_button_left_pressed) {
-			/* TODO */
+			focus = client_get_focus(server);
+			if (focus != NULL) {
+
+				double focus_x, focus_y;
+
+				client_get_geometry(focus, &box);
+				focus_x = x - (box.width / 2);
+				focus_y = y - (box.height / 2);
+
+				client_move(focus, focus_x, focus_y);
+
+				cursor_set_image(server, "all-scroll");
+				cursor_move(server, x, y);
+
+				return true;
+			}
 		}
 
 		/* resize client */
 		if (server->cursor_button_right_pressed) {
-			/* TODO */
+			focus = client_get_focus(server);
+			if (focus != NULL) {
+
+				uint32_t focus_width, focus_height;
+				client_get_geometry(focus, &box);
+
+				focus_width = (uint32_t)x - box.x;
+				focus_height = (uint32_t)y - box.y;
+
+				client_resize(focus, focus_width, focus_height);
+
+				cursor_set_image(server, "bottom_right_corner");
+				cursor_move(server,
+					    box.x + focus_width - 1,
+					    box.y + focus_height - 1);
+
+				return true;
+			}
 		}
 	}
+
+	return false;
 }
 
 bool bindings_keyboard(struct jwc_server *server, xkb_keysym_t syms)

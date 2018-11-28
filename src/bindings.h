@@ -26,7 +26,7 @@
 /**
  * TODO
  */
-void bindings_cursor(struct jwc_server *server);
+bool bindings_cursor(struct jwc_server *server, double x, double y);
 
 /**
  * TODO

@@ -20,32 +20,51 @@
 #include "cursor.h"
 #include "bindings.h"
 
-static void server_cursor_motion(struct wl_listener *listener, void *data)
+static void cursor_motion(struct wl_listener *listener, void *data)
 {
 	struct jwc_server *server = wl_container_of(listener, server, cursor_motion);
+	struct wlr_cursor *cursor = server->cursor;
 	struct wlr_event_pointer_motion *event = data;
+	bool handle;
+	double x, y;
 
-	/* set default cursor image */
-	wlr_xcursor_manager_set_cursor_image(server->cursor_mgr, "left_ptr", server->cursor);
+	/* convert to layout coordinates */
+	x = !isnan(event->delta_x) ? cursor->x + event->delta_x : cursor->x;
+	y = !isnan(event->delta_y) ? cursor->y + event->delta_y : cursor->y;
 
-	/* move the cursor in direction following the delta (x, y) */
-	wlr_cursor_move(server->cursor, event->device, event->delta_x, event->delta_y);
+	/* handle if there is a cursor bindings to apply */
+	handle = bindings_cursor(server, x, y);
 
-	bindings_cursor(server);
+	/* if no cursor bindings has been handled:
+	 * set default image and move cursor
+	 */
+	if (handle == false) {
+		cursor_set_image(server, "left_ptr");
+		cursor_move(server, x, y);
+	}
 }
 
 static void cursor_motion_absolute(struct wl_listener *listener, void *data)
 {
 	struct jwc_server *server = wl_container_of(listener, server, cursor_motion_absolute);
 	struct wlr_event_pointer_motion_absolute *event = data;
+	bool handle;
+	double x, y;
 
-	/* set default cursor image */
-	wlr_xcursor_manager_set_cursor_image(server->cursor_mgr, "left_ptr", server->cursor);
+	/* convert to layout coordinates */
+	wlr_cursor_absolute_to_layout_coords(server->cursor, server->cursor_input,
+					     event->x, event->y, &x, &y);
 
-	/* move the cursor at the coordinates (x, y) */
-	wlr_cursor_warp_absolute(server->cursor, event->device, event->x, event->y);
+	/* handle if there is a cursor bindings to apply */
+	handle = bindings_cursor(server, x, y);
 
-	bindings_cursor(server);
+	/* if no cursor bindings has been handled:
+	 * set default image and move cursor
+	 */
+	if (handle == false) {
+		cursor_set_image(server, "left_ptr");
+		cursor_move(server, x, y);
+	}
 }
 
 static void cursor_button(struct wl_listener *listener, void *data)
