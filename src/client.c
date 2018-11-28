@@ -42,6 +42,7 @@ static void xdg_surface_map(struct wl_listener *listener, void *data)
 {
 	struct jwc_client *client = wl_container_of(listener, client, map);
 	client->mapped = true;
+	client_move(client, 50, 50);
 	client_focus(client);
 }
 
@@ -93,6 +94,7 @@ static void render_surface(struct wlr_surface *surface, int sx, int sy, void *da
 		.width = surface->current.width * output->scale,
 		.height = surface->current.height * output->scale,
 	};
+
 	wlr_matrix_project_box(matrix, &box, WL_OUTPUT_TRANSFORM_NORMAL, 0,
 		output->transform_matrix);
 
@@ -150,6 +152,17 @@ void client_init(struct jwc_server *server)
 		      &server->xdg_shell_v6_surface);
 }
 
+void client_get_geometry(struct jwc_client *client, struct wlr_box *box)
+{
+	struct wlr_xdg_surface_v6 *surface = client->xdg_surface;
+	struct wlr_surface_state current = surface->surface->current;
+
+	box->x = client->x;
+	box->y = client->y;
+	box->width = current.width;
+	box->height = current.height;
+}
+
 struct jwc_client *client_get_focus(struct jwc_server *server)
 {
 	double cursor_x = server->cursor->x;
@@ -183,6 +196,20 @@ void client_close(struct jwc_client *client)
 	struct wlr_xdg_surface_v6 *surface = client->xdg_surface;
 	if (surface)
 		wlr_xdg_surface_v6_send_close(surface);
+}
+
+
+void client_move(struct jwc_client *client, double x, double y)
+{
+	client->x = x;
+	client->y = y;
+}
+
+void client_resize(struct jwc_client *client, uint32_t width, uint32_t height)
+{
+	struct wlr_xdg_surface_v6 *surface = client->xdg_surface;
+
+	wlr_xdg_toplevel_v6_set_size(surface, width, height);
 }
 
 void client_update_all_surface(struct wl_list *clients, struct wlr_output *output,

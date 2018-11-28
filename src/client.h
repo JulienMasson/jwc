@@ -57,7 +57,22 @@ struct jwc_client *client_get_focus(struct jwc_server *server);
 /**
  * TODO
  */
+void client_get_geometry(struct jwc_client *client, struct wlr_box *box);
+
+/**
+ * TODO
+ */
 void client_close(struct jwc_client *client);
+
+/**
+ * TODO
+ */
+void client_move(struct jwc_client *client, double x, double y);
+
+/**
+ * TODO
+ */
+void client_resize(struct jwc_client *client, uint32_t width, uint32_t height);
 
 /**
  * Update all surface of the client's list
