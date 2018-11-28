@@ -154,17 +154,24 @@ struct jwc_client *client_get_focus(struct jwc_server *server)
 {
 	double cursor_x = server->cursor->x;
 	double cursor_y = server->cursor->y;
-	struct wl_list *clients = &server->clients;
-	struct jwc_client *client;
-	struct wlr_surface *surface;
-	double sx, sy;
 
+	/* check if we have clients */
+	struct wl_list *clients = &server->clients;
+	if (wl_list_empty(clients))
+		return NULL;
+
+	/* loop through clients */
+	struct jwc_client *client;
+	struct wlr_surface_state current;
 	wl_list_for_each(client, clients, link) {
-		surface = wlr_xdg_surface_v6_surface_at(client->xdg_surface,
-							cursor_x,
-							cursor_y,
-							&sx, &sy);
-		if (surface)
+
+		/* current surface */
+		current = client->xdg_surface->surface->current;
+
+		/* intersect */
+		if ((cursor_x > client->x) && (cursor_y > client->y) &&
+		    (cursor_x < client->x + current.width) &&
+		    (cursor_y < client->y + current.height))
 			return client;
 	}
 
