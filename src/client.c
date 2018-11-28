@@ -183,6 +183,9 @@ void client_update_all_surface(struct wl_list *clients, struct wlr_output *outpu
 {
 	struct jwc_client *client;
 
+	if (wl_list_empty(clients))
+		return;
+
 	wl_list_for_each_reverse(client, clients, link) {
 
 		/* if client is not mapped, no need to render it */
