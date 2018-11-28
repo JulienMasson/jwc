@@ -49,6 +49,6 @@ void keyboard_new(struct jwc_server *server, struct wlr_input_device *device);
 /**
  * TODO
  */
-void keyboard_enter(struct wlr_seat *seat, struct wlr_surface *surface);
+void keyboard_enter(struct jwc_server *server, struct wlr_surface *surface);
 
 #endif

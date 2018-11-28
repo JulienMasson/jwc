@@ -57,6 +57,16 @@ struct jwc_client *client_get_focus(struct jwc_server *server);
 /**
  * TODO
  */
+void client_focus(struct jwc_client *client);
+
+/**
+ * TODO
+ */
+void client_show_on_toplevel(struct jwc_client *client);
+
+/**
+ * TODO
+ */
 void client_get_geometry(struct jwc_client *client, struct wlr_box *box);
 
 /**

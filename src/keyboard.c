@@ -123,8 +123,9 @@ void keyboard_new(struct jwc_server *server, struct wlr_input_device *device)
 	wl_list_insert(&server->keyboards, &keyboard->link);
 }
 
-void keyboard_enter(struct wlr_seat *seat, struct wlr_surface *surface)
+void keyboard_enter(struct jwc_server *server, struct wlr_surface *surface)
 {
+	struct wlr_seat *seat = server->seat;
 	struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
 
 	wlr_seat_keyboard_notify_enter(seat, surface, keyboard->keycodes,

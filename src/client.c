@@ -27,23 +27,13 @@ struct render_data {
 	struct timespec *when;
 };
 
-static void client_focus(struct jwc_client *client)
-{
-	struct wlr_seat *seat = client->server->seat;
-	struct wlr_xdg_surface_v6 *xdg_surface = client->xdg_surface;
-	struct wlr_surface *surface = xdg_surface->surface;
-
-	wlr_xdg_toplevel_v6_set_activated(xdg_surface, true);
-
-	keyboard_enter(seat, surface);
-}
-
 static void xdg_surface_map(struct wl_listener *listener, void *data)
 {
 	struct jwc_client *client = wl_container_of(listener, client, map);
 	client->mapped = true;
 	client_move(client, 50, 50);
 	client_focus(client);
+	client_show_on_toplevel(client);
 }
 
 static void xdg_surface_unmap(struct wl_listener *listener, void *data)
@@ -150,6 +140,34 @@ void client_init(struct jwc_server *server)
 	server->xdg_shell_v6_surface.notify = client_notify_new;
 	wl_signal_add(&server->xdg_shell_v6->events.new_surface,
 		      &server->xdg_shell_v6_surface);
+}
+
+void client_focus(struct jwc_client *client)
+{
+	struct wlr_xdg_surface_v6 *xdg_surface = client->xdg_surface;
+	struct wlr_surface *surface = xdg_surface->surface;
+	struct wlr_seat *seat = client->server->seat;
+
+	struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
+	if (prev_surface == surface) {
+		return;
+	}
+	if (prev_surface) {
+		struct wlr_xdg_surface_v6 *previous = wlr_xdg_surface_v6_from_wlr_surface(
+			seat->keyboard_state.focused_surface);
+		wlr_xdg_toplevel_v6_set_activated(previous, false);
+	}
+
+	wlr_xdg_toplevel_v6_set_activated(xdg_surface, true);
+
+	keyboard_enter(client->server, surface);
+}
+
+void client_show_on_toplevel(struct jwc_client *client)
+{
+	/* put this client on top of the list */
+	wl_list_remove(&client->link);
+	wl_list_insert(&client->server->clients, &client->link);
 }
 
 void client_get_geometry(struct jwc_client *client, struct wlr_box *box)
