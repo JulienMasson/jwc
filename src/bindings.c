@@ -17,38 +17,46 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KEYBOARD_H
-#define KEYBOARD_H
+#include "bindings.h"
+#include "client.h"
+#include "output.h"
 
-#include "server.h"
+void bindings_cursor(struct jwc_server *server)
+{
+	if (server->meta_key_pressed) {
 
-struct jwc_keyboard {
-	/* pointer to compositor server */
-	struct jwc_server *server;
+		/* move client */
+		if (server->cursor_button_left_pressed) {
+			/* TODO */
+		}
 
-	/* index in keyboards list */
-	struct wl_list link;
+		/* resize client */
+		if (server->cursor_button_right_pressed) {
+			/* TODO */
+		}
+	}
+}
 
-	/* Wayland listeners */
-	struct wl_listener key;
+bool bindings_keyboard(struct jwc_server *server, xkb_keysym_t syms)
+{
+	bool handle = true;
 
-	/* input ressources */
-	struct wlr_input_device *device;
-};
+	switch(syms) {
 
-/**
- * TODO
- */
-void keyboard_init(struct jwc_server *server);
+	case XKB_KEY_Escape:
+		wl_display_terminate(server->wl_display);
+		break;
 
-/**
- * TODO
- */
-void keyboard_new(struct jwc_server *server, struct wlr_input_device *device);
+	case XKB_KEY_Return:
+		if (fork() == 0) {
+			execl("/bin/sh", "/bin/sh", "-c", "weston-terminal", (void *)NULL);
+		}
+		break;
 
-/**
- * TODO
- */
-void keyboard_enter(struct wlr_seat *seat, struct wlr_surface *surface);
+	default:
+		handle = false;
+		break;
+	}
 
-#endif
+	return handle;
+}

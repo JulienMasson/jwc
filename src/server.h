@@ -21,6 +21,7 @@
 #define SERVER_H
 
 #include <assert.h>
+#include <linux/input-event-codes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,9 +62,13 @@ struct jwc_server {
 	struct wlr_xcursor_manager *cursor_mgr;
 	struct wl_listener cursor_motion;
 	struct wl_listener cursor_motion_absolute;
+	struct wl_listener cursor_button;
+	bool cursor_button_left_pressed;
+	bool cursor_button_right_pressed;
 
 	/* keyboard ressources */
 	struct wl_list keyboards;
+	bool meta_key_pressed;
 
 	/* clients resources */
 	struct wl_list clients;

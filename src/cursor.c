@@ -18,19 +18,20 @@
  */
 
 #include "cursor.h"
+#include "bindings.h"
 
-static void process_cursor_motion(struct jwc_server *server, uint32_t time)
+static void server_cursor_motion(struct wl_listener *listener, void *data)
 {
-	wlr_xcursor_manager_set_cursor_image(server->cursor_mgr, "left_ptr", server->cursor);
-}
-
-static void server_cursor_motion(struct wl_listener *listener, void *data) {
 	struct jwc_server *server = wl_container_of(listener, server, cursor_motion);
 	struct wlr_event_pointer_motion *event = data;
 
+	/* set default cursor image */
+	wlr_xcursor_manager_set_cursor_image(server->cursor_mgr, "left_ptr", server->cursor);
+
+	/* move the cursor in direction following the delta (x, y) */
 	wlr_cursor_move(server->cursor, event->device, event->delta_x, event->delta_y);
 
-	process_cursor_motion(server, event->time_msec);
+	bindings_cursor(server);
 }
 
 static void cursor_motion_absolute(struct wl_listener *listener, void *data)
@@ -38,14 +39,36 @@ static void cursor_motion_absolute(struct wl_listener *listener, void *data)
 	struct jwc_server *server = wl_container_of(listener, server, cursor_motion_absolute);
 	struct wlr_event_pointer_motion_absolute *event = data;
 
+	/* set default cursor image */
+	wlr_xcursor_manager_set_cursor_image(server->cursor_mgr, "left_ptr", server->cursor);
+
+	/* move the cursor at the coordinates (x, y) */
 	wlr_cursor_warp_absolute(server->cursor, event->device, event->x, event->y);
 
-	process_cursor_motion(server, event->time_msec);
+	bindings_cursor(server);
+}
+
+static void cursor_button(struct wl_listener *listener, void *data)
+{
+	struct jwc_server *server = wl_container_of(listener, server, cursor_button);
+	struct wlr_event_pointer_button *event = data;
+
+	server->cursor_button_left_pressed = false;
+	server->cursor_button_right_pressed = false;
+
+	if (event->state == WLR_BUTTON_PRESSED) {
+		if (event->button == BTN_LEFT)
+			server->cursor_button_left_pressed = true;
+		else if (event->button == BTN_RIGHT)
+			server->cursor_button_right_pressed = true;
+	}
 }
 
 void cursor_init(struct jwc_server *server)
 {
 	server->cursor = wlr_cursor_create();
+	server->cursor_button_left_pressed = false;
+	server->cursor_button_right_pressed = false;
 
 	/* attach the created cursor to the layout */
 	wlr_cursor_attach_output_layout(server->cursor, server->output_layout);
@@ -62,6 +85,10 @@ void cursor_init(struct jwc_server *server)
 	server->cursor_motion_absolute.notify = cursor_motion_absolute;
 	wl_signal_add(&server->cursor->events.motion_absolute,
 		      &server->cursor_motion_absolute);
+
+	/* register callback when we receive cursor button event */
+	server->cursor_button.notify = cursor_button;
+	wl_signal_add(&server->cursor->events.button, &server->cursor_button);
 }
 
 void cursor_new(struct jwc_server *server, struct wlr_input_device *device)

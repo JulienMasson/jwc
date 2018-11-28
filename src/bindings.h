@@ -17,38 +17,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KEYBOARD_H
-#define KEYBOARD_H
+#ifndef BINDINGS_H
+#define BINDINGS_H
 
 #include "server.h"
-
-struct jwc_keyboard {
-	/* pointer to compositor server */
-	struct jwc_server *server;
-
-	/* index in keyboards list */
-	struct wl_list link;
-
-	/* Wayland listeners */
-	struct wl_listener key;
-
-	/* input ressources */
-	struct wlr_input_device *device;
-};
+#include "keyboard.h"
 
 /**
  * TODO
  */
-void keyboard_init(struct jwc_server *server);
+void bindings_cursor(struct jwc_server *server);
 
 /**
  * TODO
  */
-void keyboard_new(struct jwc_server *server, struct wlr_input_device *device);
-
-/**
- * TODO
- */
-void keyboard_enter(struct wlr_seat *seat, struct wlr_surface *surface);
+bool bindings_keyboard(struct jwc_server *server, xkb_keysym_t syms);
 
 #endif
