@@ -78,7 +78,7 @@ void cursor_init(struct jwc_server *server)
 	wlr_xcursor_manager_load(server->cursor_mgr, 1);
 
 	/* register callback when we receive relative motion event */
-	server->cursor_motion.notify = server_cursor_motion;
+	server->cursor_motion.notify = cursor_motion;
 	wl_signal_add(&server->cursor->events.motion, &server->cursor_motion);
 
 	/* register callback when we receive absolute motion event */
@@ -93,6 +93,19 @@ void cursor_init(struct jwc_server *server)
 
 void cursor_new(struct jwc_server *server, struct wlr_input_device *device)
 {
+	server->cursor_input = device;
+
 	/* attaches this input device to the cursor */
 	wlr_cursor_attach_input_device(server->cursor, device);
+}
+
+void cursor_set_image(struct jwc_server *server, const char *name)
+{
+	wlr_xcursor_manager_set_cursor_image(server->cursor_mgr, name, server->cursor);
+}
+
+void cursor_move(struct jwc_server *server, double x, double y)
+{
+	if (server->cursor_input)
+		wlr_cursor_warp_closest(server->cursor, server->cursor_input, x, y);
 }

@@ -32,4 +32,14 @@ void cursor_init(struct jwc_server *server);
  */
 void cursor_new(struct jwc_server *server, struct wlr_input_device *device);
 
+/**
+ * TODO
+ */
+void cursor_set_image(struct jwc_server *server, const char *name);
+
+/**
+ * TODO
+ */
+void cursor_move(struct jwc_server *server, double x, double y);
+
 #endif

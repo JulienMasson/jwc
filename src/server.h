@@ -65,6 +65,7 @@ struct jwc_server {
 	struct wl_listener cursor_button;
 	bool cursor_button_left_pressed;
 	bool cursor_button_right_pressed;
+	struct wlr_input_device *cursor_input;
 
 	/* keyboard ressources */
 	struct wl_list keyboards;
