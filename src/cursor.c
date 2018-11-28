@@ -76,11 +76,23 @@ static void cursor_button(struct wl_listener *listener, void *data)
 	server->cursor_button_left_pressed = false;
 	server->cursor_button_right_pressed = false;
 
+	/* check if left or right button has been pressed */
 	if (event->state == WLR_BUTTON_PRESSED) {
 		if (event->button == BTN_LEFT)
 			server->cursor_button_left_pressed = true;
 		else if (event->button == BTN_RIGHT)
 			server->cursor_button_right_pressed = true;
+	}
+
+	/* if left button has been pressed show the focus client
+	 * on toplevel of the screen
+	 */
+	if (server->cursor_button_left_pressed) {
+		struct jwc_client *focus = client_get_focus(server);
+		if (focus != NULL) {
+			client_focus(focus);
+			client_show_on_toplevel(focus);
+		}
 	}
 }
 
