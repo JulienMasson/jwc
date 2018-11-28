@@ -19,52 +19,53 @@
 
 #include "cursor.h"
 #include "bindings.h"
+#include "client.h"
+
+static void cursor_motion_handle(struct jwc_server *server, double x, double y)
+{
+	bool handle;
+
+	/* handle if there is a cursor bindings to apply */
+	handle = bindings_cursor(server, x, y);
+
+	/* if no cursor bindings has been handled:
+	 * set default image and move cursor
+	 */
+	if (handle == false) {
+		cursor_set_image(server, "left_ptr");
+		cursor_move(server, x, y);
+
+		struct jwc_client *focus = client_get_focus(server);
+		if (focus != NULL)
+			client_focus(focus);
+	}
+}
 
 static void cursor_motion(struct wl_listener *listener, void *data)
 {
 	struct jwc_server *server = wl_container_of(listener, server, cursor_motion);
 	struct wlr_cursor *cursor = server->cursor;
 	struct wlr_event_pointer_motion *event = data;
-	bool handle;
 	double x, y;
 
 	/* convert to layout coordinates */
 	x = !isnan(event->delta_x) ? cursor->x + event->delta_x : cursor->x;
 	y = !isnan(event->delta_y) ? cursor->y + event->delta_y : cursor->y;
 
-	/* handle if there is a cursor bindings to apply */
-	handle = bindings_cursor(server, x, y);
-
-	/* if no cursor bindings has been handled:
-	 * set default image and move cursor
-	 */
-	if (handle == false) {
-		cursor_set_image(server, "left_ptr");
-		cursor_move(server, x, y);
-	}
+	cursor_motion_handle(server, x, y);
 }
 
 static void cursor_motion_absolute(struct wl_listener *listener, void *data)
 {
 	struct jwc_server *server = wl_container_of(listener, server, cursor_motion_absolute);
 	struct wlr_event_pointer_motion_absolute *event = data;
-	bool handle;
 	double x, y;
 
 	/* convert to layout coordinates */
 	wlr_cursor_absolute_to_layout_coords(server->cursor, server->cursor_input,
 					     event->x, event->y, &x, &y);
 
-	/* handle if there is a cursor bindings to apply */
-	handle = bindings_cursor(server, x, y);
-
-	/* if no cursor bindings has been handled:
-	 * set default image and move cursor
-	 */
-	if (handle == false) {
-		cursor_set_image(server, "left_ptr");
-		cursor_move(server, x, y);
-	}
+	cursor_motion_handle(server, x, y);
 }
 
 static void cursor_button(struct wl_listener *listener, void *data)
