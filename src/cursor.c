@@ -21,7 +21,7 @@
 #include "bindings.h"
 #include "client.h"
 
-static void cursor_motion_handle(struct jwc_server *server, double x, double y)
+static void cursor_motion_handle(struct jwc_server *server, double x, double y, uint32_t time)
 {
 	bool handle;
 
@@ -36,8 +36,21 @@ static void cursor_motion_handle(struct jwc_server *server, double x, double y)
 		cursor_move(server, x, y);
 
 		struct jwc_client *focus = client_get_focus(server);
-		if (focus != NULL)
+		if (focus != NULL) {
+			/* surface-local coordinates */
+			double sx, sy;
+			struct wlr_surface *surface =
+				wlr_xdg_surface_v6_surface_at(focus->xdg_surface,
+							      x - focus->x,
+							      y - focus->y,
+							      &sx, &sy);
+
+			/* TODO */
+			wlr_seat_pointer_notify_enter(server->seat, surface, sx, sy);
+			wlr_seat_pointer_notify_motion(server->seat, time, sx, sy);
+
 			client_focus(focus);
+		}
 	}
 }
 
@@ -52,7 +65,7 @@ static void cursor_motion(struct wl_listener *listener, void *data)
 	x = !isnan(event->delta_x) ? cursor->x + event->delta_x : cursor->x;
 	y = !isnan(event->delta_y) ? cursor->y + event->delta_y : cursor->y;
 
-	cursor_motion_handle(server, x, y);
+	cursor_motion_handle(server, x, y, event->time_msec);
 }
 
 static void cursor_motion_absolute(struct wl_listener *listener, void *data)
@@ -65,7 +78,7 @@ static void cursor_motion_absolute(struct wl_listener *listener, void *data)
 	wlr_cursor_absolute_to_layout_coords(server->cursor, server->cursor_input,
 					     event->x, event->y, &x, &y);
 
-	cursor_motion_handle(server, x, y);
+	cursor_motion_handle(server, x, y, event->time_msec);
 }
 
 static void cursor_button(struct wl_listener *listener, void *data)
@@ -75,6 +88,10 @@ static void cursor_button(struct wl_listener *listener, void *data)
 
 	server->cursor_button_left_pressed = false;
 	server->cursor_button_right_pressed = false;
+
+	/* send a button event to the surface with pointer focus */
+	wlr_seat_pointer_notify_button(server->seat, event->time_msec,
+				       event->button, event->state);
 
 	/* check if left or right button has been pressed */
 	if (event->state == WLR_BUTTON_PRESSED) {
