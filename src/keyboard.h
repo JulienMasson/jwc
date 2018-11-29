@@ -31,6 +31,7 @@ struct jwc_keyboard {
 
 	/* Wayland listeners */
 	struct wl_listener key;
+	struct wl_listener modifiers;
 
 	/* input ressources */
 	struct wlr_input_device *device;

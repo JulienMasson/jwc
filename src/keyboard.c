@@ -80,6 +80,14 @@ static void keyboard_handle_key(struct wl_listener *listener, void *data)
 	}
 }
 
+static void keyboard_handle_modifiers(struct wl_listener *listener, void *data)
+{
+	struct jwc_keyboard *keyboard = wl_container_of(listener, keyboard, modifiers);
+	wlr_seat_set_keyboard(keyboard->server->seat, keyboard->device);
+	wlr_seat_keyboard_notify_modifiers(keyboard->server->seat,
+					   &keyboard->device->keyboard->modifiers);
+}
+
 static void keyboard_set_keymap(struct wlr_keyboard *keyboard)
 {
 	struct xkb_rule_names rules = { 0 };
@@ -115,6 +123,10 @@ void keyboard_new(struct jwc_server *server, struct wlr_input_device *device)
 	/* register callback when we receive key event */
 	keyboard->key.notify = keyboard_handle_key;
 	wl_signal_add(&device->keyboard->events.key, &keyboard->key);
+
+	/* register callback when the modifier state has been updated */
+	keyboard->modifiers.notify = keyboard_handle_modifiers;
+	wl_signal_add(&device->keyboard->events.modifiers, &keyboard->modifiers);
 
 	/* set this keyboard as the active keyboard for the seat */
 	wlr_seat_set_keyboard(server->seat, device);
