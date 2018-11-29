@@ -31,9 +31,17 @@ static void xdg_surface_map(struct wl_listener *listener, void *data)
 {
 	struct jwc_client *client = wl_container_of(listener, client, map);
 	client->mapped = true;
-	client_move(client, 50, 50);
+
+	/* focus and show on toplevel */
 	client_focus(client);
 	client_show_on_toplevel(client);
+
+	/* move client to have the current pointer center on this client */
+	struct wlr_box box;
+	client_get_geometry(client, &box);
+	client_move(client,
+		    client->server->cursor->x - (box.width / 2),
+		    client->server->cursor->y - (box.height / 2));
 }
 
 static void xdg_surface_unmap(struct wl_listener *listener, void *data)
