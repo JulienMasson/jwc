@@ -89,9 +89,12 @@ static void cursor_button(struct wl_listener *listener, void *data)
 	server->cursor_button_left_pressed = false;
 	server->cursor_button_right_pressed = false;
 
-	/* send a button event to the surface with pointer focus */
-	wlr_seat_pointer_notify_button(server->seat, event->time_msec,
-				       event->button, event->state);
+	/* if the meta key has NOT been pressed, send a button event
+	 * to the surface with pointer focus.
+	 */
+	if (!server->meta_key_pressed)
+		wlr_seat_pointer_notify_button(server->seat, event->time_msec,
+					       event->button, event->state);
 
 	/* check if left or right button has been pressed */
 	if (event->state == WLR_BUTTON_PRESSED) {
@@ -102,7 +105,7 @@ static void cursor_button(struct wl_listener *listener, void *data)
 	}
 
 	/* if left button has been pressed show the focus client
-	 * on toplevel of the screen
+	 * on toplevel of the screen.
 	 */
 	if (server->cursor_button_left_pressed) {
 		struct jwc_client *focus = client_get_focus(server);
