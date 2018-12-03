@@ -82,7 +82,7 @@ void client_move(struct jwc_client *client, double x, double y);
 /**
  * TODO
  */
-void client_resize(struct jwc_client *client, uint32_t width, uint32_t height);
+void client_resize(struct jwc_client *client, double width, double height);
 
 /**
  * Update all surface of the client's list

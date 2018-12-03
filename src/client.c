@@ -228,16 +228,10 @@ void client_move(struct jwc_client *client, double x, double y)
 	client->y = y - client->xdg_surface->geometry.y;
 }
 
-void client_resize(struct jwc_client *client, uint32_t width, uint32_t height)
+void client_resize(struct jwc_client *client, double width, double height)
 {
 	struct wlr_xdg_surface_v6 *surface = client->xdg_surface;
-	uint32_t new_width, new_height;
-
-	/* TODO: set geometry to 0,0 instead of shifting coordinates */
-	new_width = width + client->xdg_surface->geometry.x;
-	new_height = height + client->xdg_surface->geometry.y;
-
-	wlr_xdg_toplevel_v6_set_size(surface, new_width, new_height);
+	wlr_xdg_toplevel_v6_set_size(surface, width, height);
 }
 
 void client_update_all_surface(struct wl_list *clients, struct wlr_output *output,
