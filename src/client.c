@@ -19,6 +19,7 @@
 
 #include "client.h"
 #include "keyboard.h"
+#include "output.h"
 
 struct render_data {
 	struct wlr_output *output;
@@ -223,6 +224,21 @@ void client_close(struct jwc_client *client)
 
 void client_move(struct jwc_client *client, double x, double y)
 {
+	struct wlr_box box;
+	struct wlr_box *layout;
+
+	/* check if the client don't cross layout */
+	client_get_geometry(client, &box);
+	layout = output_get_layout(client->server);
+	if (x < layout->x)
+		x = layout->x;
+	if ((x + box.width) > (layout->x + layout->width))
+		x = layout->x + layout->width - box.width;
+	if (y < layout->y)
+		y = layout->y;
+	if ((y + box.height) > (layout->y + layout->height))
+		y = layout->y + layout->height - box.height;
+
 	/* TODO: set geometry to 0,0 instead of shifting coordinates */
 	client->x = x - client->xdg_surface->geometry.x;
 	client->y = y - client->xdg_surface->geometry.y;
@@ -230,6 +246,18 @@ void client_move(struct jwc_client *client, double x, double y)
 
 void client_resize(struct jwc_client *client, double width, double height)
 {
+	struct wlr_box box;
+	struct wlr_box *layout;
+
+	/* check if the client don't cross layout */
+	client_get_geometry(client, &box);
+	layout = output_get_layout(client->server);
+	if ((box.x + width) > (layout->x + layout->width))
+		width = layout->x + layout->width - box.x;
+	if ((box.y + height) > (layout->y + layout->height))
+		height = layout->y + layout->height - box.y;
+
+	/* request this toplevel surface be the given size */
 	struct wlr_xdg_surface_v6 *surface = client->xdg_surface;
 	wlr_xdg_toplevel_v6_set_size(surface, width, height);
 }

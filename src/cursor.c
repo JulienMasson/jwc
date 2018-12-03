@@ -20,6 +20,7 @@
 #include "cursor.h"
 #include "bindings.h"
 #include "client.h"
+#include "output.h"
 
 static void cursor_motion_handle(struct jwc_server *server, double x, double y, uint32_t time)
 {
@@ -149,6 +150,12 @@ void cursor_new(struct jwc_server *server, struct wlr_input_device *device)
 
 	/* attaches this input device to the cursor */
 	wlr_cursor_attach_input_device(server->cursor, device);
+
+	/* by default move the cursor center of left output and set image */
+	struct wlr_box box;
+	output_get_output_geo_at(server, 0, 0, &box);
+	cursor_move(server, box.x + (box.width / 2), box.y + (box.height / 2));
+	cursor_set_image(server, "left_ptr");
 }
 
 void cursor_set_image(struct jwc_server *server, const char *name)

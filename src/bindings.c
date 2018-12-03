@@ -27,7 +27,6 @@ bool bindings_cursor(struct jwc_server *server, double x, double y)
 {
 	struct jwc_client *focus;
 	struct wlr_box box;
-	struct wlr_box *layout;
 
 	if (server->meta_key_pressed) {
 
@@ -42,17 +41,6 @@ bool bindings_cursor(struct jwc_server *server, double x, double y)
 				client_get_geometry(focus, &box);
 				focus_x = x - (box.width / 2);
 				focus_y = y - (box.height / 2);
-
-				/* check if the client don't cross layout */
-				layout = output_get_layout(server);
-				if (focus_x < layout->x)
-					focus_x = layout->x;
-				if ((focus_x + box.width) > (layout->x + layout->width))
-					focus_x = layout->x + layout->width - box.width;
-				if (focus_y < layout->y)
-					focus_y = layout->y;
-				if ((focus_y + box.height) > (layout->y + layout->height))
-					focus_y = layout->y + layout->height - box.height;
 
 				/* move client/cursor */
 				client_move(focus, focus_x, focus_y);
@@ -74,13 +62,6 @@ bool bindings_cursor(struct jwc_server *server, double x, double y)
 				client_get_geometry(focus, &box);
 				focus_width = x - box.x;
 				focus_height = y - box.y;
-
-				/* check if the client don't cross layout */
-				layout = output_get_layout(server);
-				if ((box.x + focus_width) > (layout->x + layout->width))
-					focus_width = layout->x + layout->width - box.x;
-				if ((box.y + focus_height) > (layout->y + layout->height))
-					focus_height = layout->y + layout->height - box.y;
 
 				/* resize client and move cursor */
 				client_resize(focus, focus_width, focus_height);
