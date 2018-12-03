@@ -94,7 +94,7 @@ static void output_notify_new(struct wl_listener *listener, void *data)
 	/* Set custom layout otherwise add an auto configured output to the layout */
 	if (!strcmp(wlr_output->name, "eDP-1"))
 		wlr_output_layout_add(server->output_layout, wlr_output, 2560, 0);
-	else if (!strcmp(wlr_output->name, "HDMI-A-1"))
+	else if (!strcmp(wlr_output->name, "DP-3"))
 		wlr_output_layout_add(server->output_layout, wlr_output, 0, 0);
 	else
 		wlr_output_layout_add_auto(server->output_layout, wlr_output);
