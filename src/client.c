@@ -84,20 +84,8 @@ static void render_surface(struct wlr_surface *surface, int sx, int sy, void *da
 	ox += client->x + sx;
 	oy += client->y + sy;
 
-	/* create matrix box */
-	float matrix[9];
-	struct wlr_box box = {
-		.x = ox * output->scale,
-		.y = oy * output->scale,
-		.width = surface->current.width * output->scale,
-		.height = surface->current.height * output->scale,
-	};
+	wlr_render_texture(rdata->renderer, texture, output->transform_matrix, ox, oy, 1);
 
-	wlr_matrix_project_box(matrix, &box, WL_OUTPUT_TRANSFORM_NORMAL, 0,
-		output->transform_matrix);
-
-	/* render the matrix texture and send the surface */
-	wlr_render_texture_with_matrix(rdata->renderer, texture, matrix, 1);
 	wlr_surface_send_frame_done(surface, rdata->when);
 }
 
