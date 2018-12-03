@@ -126,6 +126,20 @@ static void output_notify_new(struct wl_listener *listener, void *data)
 	wlr_output_create_global(wlr_output);
 }
 
+void output_get_output_geo_at(struct jwc_server *server, double x, double y, struct wlr_box *box)
+{
+	struct wlr_output_layout_output *layout_output;
+	struct wlr_output *output = wlr_output_layout_output_at(server->output_layout, x, y);
+
+	if (output) {
+		layout_output = wlr_output_layout_get(server->output_layout, output);
+		box->x = layout_output->x;
+		box->y = layout_output->y;
+		box->width = output->width;
+		box->height = output->height;
+	}
+}
+
 struct wlr_box *output_get_layout(struct jwc_server *server)
 {
 	return wlr_output_layout_get_box(server->output_layout, NULL);
