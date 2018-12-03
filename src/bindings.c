@@ -67,19 +67,29 @@ bool bindings_cursor(struct jwc_server *server, double x, double y)
 		if (server->cursor_button_right_pressed) {
 			focus = client_get_focus(server);
 			if (focus != NULL) {
-
-				uint32_t focus_width, focus_height;
+				/* calculate focus coordinates based on
+				 * client geometry.
+				 */
+				double focus_width, focus_height;
 				client_get_geometry(focus, &box);
+				focus_width = x - box.x;
+				focus_height = y - box.y;
 
-				focus_width = (uint32_t)x - box.x;
-				focus_height = (uint32_t)y - box.y;
+				/* check if the client don't cross layout */
+				layout = output_get_layout(server);
+				if ((box.x + focus_width) > (layout->x + layout->width))
+					focus_width = layout->x + layout->width - box.x;
+				if ((box.y + focus_height) > (layout->y + layout->height))
+					focus_height = layout->y + layout->height - box.y;
 
+				/* resize client and move cursor */
 				client_resize(focus, focus_width, focus_height);
-
 				cursor_set_image(server, "bottom_right_corner");
-				cursor_move(server,
-					    box.x + focus_width - 1,
-					    box.y + focus_height - 1);
+
+				/* TODO: need a grab mechanism instead of shifting by 40
+				 * to make sure we don't loose the focus when resizing
+				 */
+				cursor_move(server, x - 40, y - 40);
 
 				return true;
 			}
