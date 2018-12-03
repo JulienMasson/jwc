@@ -29,6 +29,7 @@ struct jwc_output {
 
 	/* Wayland listeners */
 	struct wl_listener frame;
+	struct wl_listener destroy;
 
 	/* output ressources */
 	struct wlr_output *wlr_output;
@@ -64,6 +65,24 @@ static void output_frame(struct wl_listener *listener, void *data)
 	wlr_output_swap_buffers(output->wlr_output, NULL, NULL);
 }
 
+static void output_destroy(struct wl_listener *listener, void *data)
+{
+	struct jwc_output *output = wl_container_of(listener, output, destroy);
+	struct jwc_server *server = output->server;
+
+	/* remove this output from the layout */
+	wlr_output_layout_remove(server->output_layout, output->wlr_output);
+
+	/* unregister listeners */
+	wl_list_remove(&output->frame.link);
+	wl_list_remove(&output->destroy.link);
+
+	/* remove this output from the global list */
+	wl_list_remove(&output->link);
+
+	free(output);
+}
+
 static void output_notify_new(struct wl_listener *listener, void *data)
 {
 	struct jwc_server *server = wl_container_of(listener, server, new_output);
@@ -87,6 +106,10 @@ static void output_notify_new(struct wl_listener *listener, void *data)
 	/* register callback when we get frame events from this output */
 	output->frame.notify = output_frame;
 	wl_signal_add(&wlr_output->events.frame, &output->frame);
+
+	/* register callback when we an output has been removed */
+	output->destroy.notify = output_destroy;
+	wl_signal_add(&wlr_output->events.destroy, &output->destroy);
 
 	/* add this output to the outputs server list */
 	wl_list_insert(&server->outputs, &output->link);
