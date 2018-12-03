@@ -41,7 +41,7 @@ struct jwc_client {
 
 	/* client ressources */
 	bool mapped;
-	int x, y;
+	double x, y;
 };
 
 /**

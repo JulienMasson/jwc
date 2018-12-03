@@ -169,12 +169,12 @@ void client_show_on_toplevel(struct jwc_client *client)
 void client_get_geometry(struct jwc_client *client, struct wlr_box *box)
 {
 	struct wlr_xdg_surface_v6 *surface = client->xdg_surface;
-	struct wlr_surface_state current = surface->surface->current;
 
-	box->x = client->x;
-	box->y = client->y;
-	box->width = current.width;
-	box->height = current.height;
+	/* TODO: set geometry to 0,0 instead of shifting coordinates */
+	box->x = client->x + surface->geometry.x;
+	box->y = client->y + surface->geometry.y;
+	box->width = surface->geometry.width;
+	box->height = surface->geometry.height;
 }
 
 struct jwc_client *client_get_focus(struct jwc_server *server)
@@ -189,16 +189,24 @@ struct jwc_client *client_get_focus(struct jwc_server *server)
 
 	/* loop through clients */
 	struct jwc_client *client;
-	struct wlr_surface_state current;
+	double client_x, client_y;
+	int geo_x, geo_y, geo_width, geo_height;
+
 	wl_list_for_each(client, clients, link) {
 
-		/* current surface */
-		current = client->xdg_surface->surface->current;
+		/* TODO: set geometry to 0,0 instead of shifting coordinates */
+		geo_x = client->xdg_surface->geometry.x;
+		geo_y = client->xdg_surface->geometry.y;
+		geo_width = client->xdg_surface->geometry.width;
+		geo_height = client->xdg_surface->geometry.height;
+
+		client_x = client->x + geo_x;
+		client_y = client->y + geo_y;
 
 		/* intersect */
-		if ((cursor_x > client->x) && (cursor_y > client->y) &&
-		    (cursor_x < client->x + current.width) &&
-		    (cursor_y < client->y + current.height))
+		if ((cursor_x > client_x) && (cursor_y > client_y) &&
+		    (cursor_x < client_x + geo_width) &&
+		    (cursor_y < client_y + geo_height))
 			return client;
 	}
 
@@ -215,15 +223,21 @@ void client_close(struct jwc_client *client)
 
 void client_move(struct jwc_client *client, double x, double y)
 {
-	client->x = x;
-	client->y = y;
+	/* TODO: set geometry to 0,0 instead of shifting coordinates */
+	client->x = x - client->xdg_surface->geometry.x;
+	client->y = y - client->xdg_surface->geometry.y;
 }
 
 void client_resize(struct jwc_client *client, uint32_t width, uint32_t height)
 {
 	struct wlr_xdg_surface_v6 *surface = client->xdg_surface;
+	uint32_t new_width, new_height;
 
-	wlr_xdg_toplevel_v6_set_size(surface, width, height);
+	/* TODO: set geometry to 0,0 instead of shifting coordinates */
+	new_width = width + client->xdg_surface->geometry.x;
+	new_height = height + client->xdg_surface->geometry.y;
+
+	wlr_xdg_toplevel_v6_set_size(surface, new_width, new_height);
 }
 
 void client_update_all_surface(struct wl_list *clients, struct wlr_output *output,
