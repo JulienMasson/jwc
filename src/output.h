@@ -27,4 +27,9 @@
  */
 void output_init(struct jwc_server *server);
 
+/**
+ * TODO
+ */
+struct wlr_box *output_get_layout(struct jwc_server *server);
+
 #endif

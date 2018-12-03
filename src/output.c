@@ -126,6 +126,11 @@ static void output_notify_new(struct wl_listener *listener, void *data)
 	wlr_output_create_global(wlr_output);
 }
 
+struct wlr_box *output_get_layout(struct jwc_server *server)
+{
+	return wlr_output_layout_get_box(server->output_layout, NULL);
+}
+
 void output_init(struct jwc_server *server)
 {
 	wl_list_init(&server->outputs);
