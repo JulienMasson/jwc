@@ -46,12 +46,6 @@ static void xdg_surface_map(struct wl_listener *listener, void *data)
 		    client->server->cursor->y - (box.height / 2));
 }
 
-static void xdg_surface_unmap(struct wl_listener *listener, void *data)
-{
-	struct jwc_client *client = wl_container_of(listener, client, map);
-	client->mapped = false;
-}
-
 static void xdg_surface_destroy(struct wl_listener *listener, void *data)
 {
 	struct jwc_client *client = wl_container_of(listener, client, destroy);
@@ -116,9 +110,6 @@ static void client_notify_new(struct wl_listener *listener, void *data)
 	/* register callbacks when we get events from this client */
 	client->map.notify = xdg_surface_map;
 	wl_signal_add(&xdg_surface->events.map, &client->map);
-
-	client->unmap.notify = xdg_surface_unmap;
-	wl_signal_add(&xdg_surface->events.unmap, &client->unmap);
 
 	client->destroy.notify = xdg_surface_destroy;
 	wl_signal_add(&xdg_surface->events.destroy, &client->destroy);
