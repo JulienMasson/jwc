@@ -19,6 +19,9 @@
 
 #include "output.h"
 #include "client.h"
+#include "utils.h"
+
+#define DEFAULT_PRIMARY_OUTPUT "eDP-1"
 
 struct jwc_output {
 	/* pointer to compositor server */
@@ -81,6 +84,49 @@ static void output_destroy(struct wl_listener *listener, void *data)
 	wl_list_remove(&output->link);
 
 	free(output);
+
+	client_update_all(server);
+}
+
+static struct jwc_output *output_get_primary(struct jwc_server *server)
+{
+	struct wl_list *outputs = &server->outputs;
+	if (wl_list_empty(outputs))
+		return NULL;
+
+	struct jwc_output *output;
+	wl_list_for_each(output, outputs, link) {
+		if (!strcmp(output->wlr_output->name, DEFAULT_PRIMARY_OUTPUT))
+			return output;
+	}
+
+	return NULL;
+}
+
+static void output_auto_configure(struct jwc_server *server, struct wlr_output *wlr_output)
+{
+	wlr_output_layout_add(server->output_layout, wlr_output, 0, 0);
+
+	struct wl_list *outputs = &server->outputs;
+	if (wl_list_empty(outputs))
+		return;
+
+	/* make sure primary output is on top of the list */
+	struct jwc_output *primary = output_get_primary(server);
+	if (primary) {
+		wl_list_remove(&primary->link);
+		wl_list_insert(outputs, &primary->link);
+	}
+
+	/* TODO */
+	struct jwc_output *output;
+	int32_t width = 0;
+	wl_list_for_each_reverse(output, outputs, link) {
+		wlr_output_layout_move(server->output_layout, output->wlr_output, width, 0);
+		width += output->wlr_output->width;
+	}
+
+	client_update_all(server);
 }
 
 static void output_notify_new(struct wl_listener *listener, void *data)
@@ -95,13 +141,10 @@ static void output_notify_new(struct wl_listener *listener, void *data)
 		wlr_output_set_mode(wlr_output, mode);
 	}
 
-	wlr_log(WLR_INFO, "New output: %s %dx%d", wlr_output->name, wlr_output->width,
-		wlr_output->height);
-
 	/* create new output */
 	struct jwc_output *output = calloc(1, sizeof(struct jwc_output));
-	output->wlr_output = wlr_output;
 	output->server = server;
+	output->wlr_output = wlr_output;
 
 	/* register callback when we get frame events from this output */
 	output->frame.notify = output_frame;
@@ -114,16 +157,16 @@ static void output_notify_new(struct wl_listener *listener, void *data)
 	/* add this output to the outputs server list */
 	wl_list_insert(&server->outputs, &output->link);
 
-	/* Set custom layout otherwise add an auto configured output to the layout */
-	if (!strcmp(wlr_output->name, "eDP-1"))
-		wlr_output_layout_add(server->output_layout, wlr_output, 2560, 0);
-	else if (!strcmp(wlr_output->name, "DP-3"))
-		wlr_output_layout_add(server->output_layout, wlr_output, 0, 0);
-	else
-		wlr_output_layout_add_auto(server->output_layout, wlr_output);
+	/* auto configure output */
+	output_auto_configure(server, wlr_output);
 
 	/* create a global of this output */
 	wlr_output_create_global(wlr_output);
+}
+
+struct wlr_output *output_get_output_at(struct jwc_server *server, double x, double y)
+{
+	return output_get_layout_output_at(server, x, y);
 }
 
 void output_get_output_geo_at(struct jwc_server *server, double x, double y, struct wlr_box *box)

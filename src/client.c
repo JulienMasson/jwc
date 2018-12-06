@@ -288,3 +288,24 @@ void client_update_all_surface(struct wl_list *clients, struct wlr_output *outpu
 						    render_surface, &rdata);
 	}
 }
+
+void client_update_all(struct jwc_server *server)
+{
+	struct wl_list *clients = &server->clients;
+	if (wl_list_empty(clients))
+		return;
+
+	struct jwc_client *client;
+	struct wlr_box box;
+	struct wlr_output *output;
+
+	wl_list_for_each(client, clients, link) {
+
+		client_get_geometry(client, &box);
+
+		output = output_get_output_at(server, box.x, box.y);
+
+		if (output == NULL)
+			client_move(client, 0, 0);
+	}
+}

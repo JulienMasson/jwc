@@ -89,5 +89,6 @@ void client_resize(struct jwc_client *client, double width, double height);
  */
 void client_update_all_surface(struct wl_list *clients, struct wlr_output *output,
 			       struct timespec *when);
+void client_update_all(struct jwc_server *server);
 
 #endif

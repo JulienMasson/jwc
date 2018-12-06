@@ -35,6 +35,7 @@ struct wlr_box *output_get_layout(struct jwc_server *server);
 /**
  * TODO
  */
+struct wlr_output *output_get_output_at(struct jwc_server *server, double x, double y);
 void output_get_output_geo_at(struct jwc_server *server, double x, double y,
 			      struct wlr_box *box);
 
