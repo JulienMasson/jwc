@@ -61,7 +61,7 @@ static void output_frame(struct wl_listener *listener, void *data)
 	wlr_renderer_clear(renderer, color);
 
 	/* update all client's surface of this output */
-	client_update_all_surface(&output->server->clients, output->wlr_output, &now);
+	client_render_all(server, wlr_output, &now);
 
 	/* Finish rendering and swap buffers */
 	wlr_renderer_end(renderer);

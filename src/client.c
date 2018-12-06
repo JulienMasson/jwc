@@ -262,13 +262,22 @@ void client_resize(struct jwc_client *client, double width, double height)
 	wlr_xdg_toplevel_v6_set_size(surface, width, height);
 }
 
-void client_update_all_surface(struct wl_list *clients, struct wlr_output *output,
-			       struct timespec *when)
 {
-	struct jwc_client *client;
 
+void client_render_all(struct jwc_server *server, struct wlr_output *output,
+		       struct timespec *when)
+{
+	struct wl_list *clients = &server->clients;
 	if (wl_list_empty(clients))
 		return;
+
+	/* render all clients expect toplevel */
+	struct jwc_client *client;
+	struct render_data rdata = {
+		.output = output,
+		.renderer = server->renderer,
+		.when = when,
+	};
 
 	wl_list_for_each_reverse(client, clients, link) {
 
@@ -277,13 +286,7 @@ void client_update_all_surface(struct wl_list *clients, struct wlr_output *outpu
 			continue;
 
 		/* update xdg shell v6 surface of the client */
-		struct jwc_server *server = client->server;
-		struct render_data rdata = {
-			.output = output,
-			.client = client,
-			.renderer = server->renderer,
-			.when = when,
-		};
+		rdata.client = client;
 		wlr_xdg_surface_v6_for_each_surface(client->xdg_surface,
 						    render_surface, &rdata);
 	}
