@@ -38,22 +38,21 @@ struct jwc_output {
 	struct wlr_output *wlr_output;
 };
 
-static void output_frame(struct wl_listener *listener, void *data)
+static void output_render(struct jwc_server *server, struct wlr_output *wlr_output)
 {
-	struct jwc_output *output = wl_container_of(listener, output, frame);
-	struct wlr_renderer *renderer = output->server->renderer;
+	struct wlr_renderer *renderer = server->renderer;
 
 	/* get current time */
 	struct timespec now;
 	clock_gettime(CLOCK_MONOTONIC, &now);
 
 	/* make the output rendering context current */
-	if (!wlr_output_make_current(output->wlr_output, NULL))
+	if (!wlr_output_make_current(wlr_output, NULL))
 		return;
 
 	/* start rendering on all output frame*/
 	int width, height;
-	wlr_output_effective_resolution(output->wlr_output, &width, &height);
+	wlr_output_effective_resolution(wlr_output, &width, &height);
 	wlr_renderer_begin(renderer, width, height);
 
 	/* default color in background */
@@ -65,7 +64,14 @@ static void output_frame(struct wl_listener *listener, void *data)
 
 	/* Finish rendering and swap buffers */
 	wlr_renderer_end(renderer);
-	wlr_output_swap_buffers(output->wlr_output, NULL, NULL);
+	wlr_output_swap_buffers(wlr_output, NULL, NULL);
+}
+
+static void output_frame(struct wl_listener *listener, void *data)
+{
+	struct jwc_output *output = wl_container_of(listener, output, frame);
+
+	output_render(output->server, output->wlr_output);
 }
 
 static void output_destroy(struct wl_listener *listener, void *data)
@@ -164,6 +170,11 @@ static void output_notify_new(struct wl_listener *listener, void *data)
 	wlr_output_create_global(wlr_output);
 }
 
+static struct wlr_output *output_get_layout_output_at(struct jwc_server *server, double x, double y)
+{
+	return wlr_output_layout_output_at(server->output_layout, x, y);
+}
+
 struct wlr_output *output_get_output_at(struct jwc_server *server, double x, double y)
 {
 	return output_get_layout_output_at(server, x, y);
@@ -172,7 +183,7 @@ struct wlr_output *output_get_output_at(struct jwc_server *server, double x, dou
 void output_get_output_geo_at(struct jwc_server *server, double x, double y, struct wlr_box *box)
 {
 	struct wlr_output_layout_output *layout_output;
-	struct wlr_output *output = wlr_output_layout_output_at(server->output_layout, x, y);
+	struct wlr_output *output = output_get_layout_output_at(server, x, y);
 
 	if (output) {
 		layout_output = wlr_output_layout_get(server->output_layout, output);
