@@ -55,16 +55,16 @@ void client_init(struct jwc_server *server);
  * TODO
  */
 struct jwc_client *client_get_focus(struct jwc_server *server);
+void client_set_focus(struct jwc_client *client);
 
 /**
  * TODO
  */
-void client_focus(struct jwc_client *client);
+void client_set_on_toplevel(struct jwc_client *client);
 
 /**
  * TODO
  */
-void client_show_on_toplevel(struct jwc_client *client);
 
 /**
  * TODO
@@ -79,11 +79,11 @@ void client_close(struct jwc_client *client);
 /**
  * TODO
  */
-void client_move(struct jwc_client *client, double x, double y);
 
 /**
  * TODO
  */
+void client_move(struct jwc_client *client, double x, double y);
 void client_resize(struct jwc_client *client, double width, double height);
 void client_move_resize(struct jwc_client *client, double x, double y,
 			double width, double height);

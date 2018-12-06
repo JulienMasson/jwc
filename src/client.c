@@ -35,8 +35,8 @@ static void xdg_surface_map(struct wl_listener *listener, void *data)
 	client->mapped = true;
 
 	/* focus and show on toplevel */
-	client_focus(client);
-	client_show_on_toplevel(client);
+	client_set_focus(client);
+	client_set_on_toplevel(client);
 
 	/* move client to have the current pointer center on this client */
 	struct wlr_box box;
@@ -142,7 +142,7 @@ void client_init(struct jwc_server *server)
 		      &server->xdg_shell_v6_surface);
 }
 
-void client_focus(struct jwc_client *client)
+void client_set_focus(struct jwc_client *client)
 {
 	struct wlr_xdg_surface_v6 *xdg_surface = client->xdg_surface;
 	struct wlr_surface *surface = xdg_surface->surface;
@@ -163,7 +163,7 @@ void client_focus(struct jwc_client *client)
 	keyboard_enter(client->server, surface);
 }
 
-void client_show_on_toplevel(struct jwc_client *client)
+void client_set_on_toplevel(struct jwc_client *client)
 {
 	/* put this client on top of the list */
 	wl_list_remove(&client->link);

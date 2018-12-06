@@ -50,7 +50,7 @@ static void cursor_motion_handle(struct jwc_server *server, double x, double y, 
 			wlr_seat_pointer_notify_enter(server->seat, surface, sx, sy);
 			wlr_seat_pointer_notify_motion(server->seat, time, sx, sy);
 
-			client_focus(focus);
+			client_set_focus(focus);
 		}
 	}
 }
@@ -111,8 +111,8 @@ static void cursor_button(struct wl_listener *listener, void *data)
 	if (server->cursor_button_left_pressed) {
 		struct jwc_client *focus = client_get_focus(server);
 		if (focus != NULL) {
-			client_focus(focus);
-			client_show_on_toplevel(focus);
+			client_set_focus(focus);
+			client_set_on_toplevel(focus);
 		}
 	}
 }
