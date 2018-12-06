@@ -20,6 +20,7 @@
 #include "client.h"
 #include "keyboard.h"
 #include "output.h"
+#include "utils.h"
 
 struct render_data {
 	struct wlr_output *output;
@@ -57,14 +58,20 @@ static void xdg_surface_destroy(struct wl_listener *listener, void *data)
 	free(client);
 }
 
-static void xdg_toplevel_request_move(struct wl_listener *listener, void *data)
+static void xdg_surface_commit(struct wl_listener *listener, void *data)
 {
-	/* TODO */
-}
+	struct jwc_client *client = wl_container_of(listener, client, surface_commit);
+	struct wlr_xdg_surface_v6 *surface = client->xdg_surface;
 
-static void xdg_toplevel_request_resize(struct wl_listener *listener, void *data)
-{
-	/* TODO */
+	uint32_t pending_serial = client->pending_serial;
+
+	if (pending_serial > 0 && pending_serial >= surface->configure_serial) {
+
+		client_move(client, client->pending_geo.x, client->pending_geo.y);
+
+		if (pending_serial == surface->configure_serial)
+			client->pending_serial = 0;
+	}
 }
 
 static void render_surface(struct wlr_surface *surface, int sx, int sy, void *data)
@@ -99,7 +106,6 @@ static void client_notify_new(struct wl_listener *listener, void *data)
 	/* only toplevel surface are accepted */
 	if (xdg_surface->role != WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL)
 		return;
-	struct wlr_xdg_toplevel_v6 *toplevel = xdg_surface->toplevel;
 
 	/* create new client */
 	struct jwc_client *client = calloc(1, sizeof(struct jwc_client));
@@ -116,11 +122,8 @@ static void client_notify_new(struct wl_listener *listener, void *data)
 	client->destroy.notify = xdg_surface_destroy;
 	wl_signal_add(&xdg_surface->events.destroy, &client->destroy);
 
-	client->request_move.notify = xdg_toplevel_request_move;
-	wl_signal_add(&toplevel->events.request_move, &client->request_move);
-
-	client->request_resize.notify = xdg_toplevel_request_resize;
-	wl_signal_add(&toplevel->events.request_resize, &client->request_resize);
+	client->surface_commit.notify = xdg_surface_commit;
+	wl_signal_add(&xdg_surface->surface->events.commit, &client->surface_commit);
 
 	/* add this client to the clients server list */
 	wl_list_insert(&server->clients, &client->link);
@@ -170,12 +173,20 @@ void client_show_on_toplevel(struct jwc_client *client)
 void client_get_geometry(struct jwc_client *client, struct wlr_box *box)
 {
 	struct wlr_xdg_surface_v6 *surface = client->xdg_surface;
+	uint32_t pending_serial = client->pending_serial;
 
-	/* TODO: set geometry to 0,0 instead of shifting coordinates */
-	box->x = client->x + surface->geometry.x;
-	box->y = client->y + surface->geometry.y;
-	box->width = surface->geometry.width;
-	box->height = surface->geometry.height;
+	if (pending_serial > 0 && pending_serial >= surface->configure_serial) {
+		box->x = client->pending_geo.x;
+		box->y = client->pending_geo.y;
+		box->width = client->pending_geo.width;
+		box->height = client->pending_geo.height;
+	} else {
+		/* TODO: set geometry to 0,0 instead of shifting coordinates */
+		box->x = client->x + surface->geometry.x;
+		box->y = client->y + surface->geometry.y;
+		box->width = surface->geometry.width;
+		box->height = surface->geometry.height;
+	}
 }
 
 struct jwc_client *client_get_focus(struct jwc_server *server)
@@ -262,7 +273,35 @@ void client_resize(struct jwc_client *client, double width, double height)
 	wlr_xdg_toplevel_v6_set_size(surface, width, height);
 }
 
+void client_move_resize(struct jwc_client *client, double x, double y,
+			double width, double height)
 {
+	struct wlr_box *layout;
+
+	/* check if the client don't cross layout */
+	layout = output_get_layout(client->server);
+	if (x < layout->x)
+		x = layout->x;
+	if ((x + width) > (layout->x + layout->width))
+		width = layout->x + layout->width - x;
+	if (y < layout->y)
+		y = layout->y;
+	if ((y + height) > (layout->y + layout->height))
+		height = layout->y + layout->height + height - y;
+
+	/* TODO */
+	struct wlr_xdg_surface_v6 *surface = client->xdg_surface;
+	uint32_t serial = wlr_xdg_toplevel_v6_set_size(surface, width, height);
+	if (serial > 0) {
+		client->pending_geo.x = x;
+		client->pending_geo.y = y;
+		client->pending_geo.width = width;
+		client->pending_geo.height = height;
+		client->pending_serial = serial;
+	} else if (client->pending_serial == 0) {
+		client_move(client, x, y);
+	}
+}
 
 void client_render_all(struct jwc_server *server, struct wlr_output *output,
 		       struct timespec *when)

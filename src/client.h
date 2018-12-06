@@ -36,12 +36,14 @@ struct jwc_client {
 	struct wl_listener map;
 	struct wl_listener unmap;
 	struct wl_listener destroy;
-	struct wl_listener request_move;
-	struct wl_listener request_resize;
+	struct wl_listener surface_commit;
 
 	/* client ressources */
 	bool mapped;
 	double x, y;
+	struct wlr_box orig;
+	struct wlr_box pending_geo;
+	uint32_t pending_serial;
 };
 
 /**
@@ -83,6 +85,8 @@ void client_move(struct jwc_client *client, double x, double y);
  * TODO
  */
 void client_resize(struct jwc_client *client, double width, double height);
+void client_move_resize(struct jwc_client *client, double x, double y,
+			double width, double height);
 
 /**
  * TODO
