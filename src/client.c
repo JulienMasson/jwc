@@ -163,6 +163,17 @@ void client_set_focus(struct jwc_client *client)
 	keyboard_enter(client->server, surface);
 }
 
+struct jwc_client *client_get_on_toplevel(struct jwc_server *server)
+{
+	struct wl_list *clients = &server->clients;
+	struct jwc_client *client;
+
+	if (wl_list_empty(clients))
+		return NULL;
+
+	return wl_container_of(clients->next, client, link);
+}
+
 void client_set_on_toplevel(struct jwc_client *client)
 {
 	/* put this client on top of the list */

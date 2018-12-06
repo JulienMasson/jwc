@@ -60,6 +60,7 @@ void client_set_focus(struct jwc_client *client);
 /**
  * TODO
  */
+struct jwc_client *client_get_on_toplevel(struct jwc_server *server);
 void client_set_on_toplevel(struct jwc_client *client);
 
 /**
