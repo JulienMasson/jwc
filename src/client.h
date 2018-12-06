@@ -66,6 +66,8 @@ void client_set_on_toplevel(struct jwc_client *client);
 /**
  * TODO
  */
+struct jwc_client *client_get_last(struct jwc_server *server);
+
 
 /**
  * TODO

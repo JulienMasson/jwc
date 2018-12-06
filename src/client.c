@@ -181,6 +181,22 @@ void client_set_on_toplevel(struct jwc_client *client)
 	wl_list_insert(&client->server->clients, &client->link);
 }
 
+struct jwc_client *client_get_last(struct jwc_server *server)
+{
+	struct wl_list *clients = &server->clients;
+	struct jwc_client *client;
+
+	if (wl_list_empty(clients))
+		return NULL;
+
+	wl_list_for_each_reverse(client, clients, link) {
+		if (client->mapped == true)
+			return client;
+	}
+
+	return NULL;
+}
+
 void client_get_geometry(struct jwc_client *client, struct wlr_box *box)
 {
 	struct wlr_xdg_surface_v6 *surface = client->xdg_surface;
