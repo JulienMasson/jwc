@@ -39,11 +39,11 @@ struct jwc_client {
 	struct wl_listener surface_commit;
 
 	/* client ressources */
-	bool mapped;
 	double x, y;
 	struct wlr_box orig;
 	struct wlr_box pending_geo;
 	uint32_t pending_serial;
+	bool mapped, maximized, fullscreen;
 };
 
 /**
@@ -68,6 +68,10 @@ void client_set_on_toplevel(struct jwc_client *client);
  */
 struct jwc_client *client_get_last(struct jwc_server *server);
 
+/**
+ * TODO
+ */
+void client_unmap(struct jwc_client *client);
 
 /**
  * TODO
@@ -82,6 +86,8 @@ void client_close(struct jwc_client *client);
 /**
  * TODO
  */
+void client_set_maximazed(struct jwc_client *client, bool maximized);
+void client_set_fullscreen(struct jwc_client *client, bool fullscreen);
 
 /**
  * TODO

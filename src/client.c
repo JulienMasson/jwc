@@ -48,7 +48,8 @@ static void xdg_surface_map(struct wl_listener *listener, void *data)
 
 static void xdg_surface_unmap(struct wl_listener *listener, void *data)
 {
-	/* TODO */
+	struct jwc_client *client = wl_container_of(listener, client, map);
+	client->mapped = false;
 }
 
 static void xdg_surface_destroy(struct wl_listener *listener, void *data)
@@ -197,6 +198,17 @@ struct jwc_client *client_get_last(struct jwc_server *server)
 	return NULL;
 }
 
+void client_unmap(struct jwc_client *client)
+{
+	client->mapped = false;
+
+	struct jwc_client *last = client_get_last(client->server);
+	if (last) {
+		wl_list_remove(&client->link);
+		wl_list_insert(&last->link, &client->link);
+	}
+}
+
 void client_get_geometry(struct jwc_client *client, struct wlr_box *box)
 {
 	struct wlr_xdg_surface_v6 *surface = client->xdg_surface;
@@ -233,6 +245,9 @@ struct jwc_client *client_get_focus(struct jwc_server *server)
 
 	wl_list_for_each(client, clients, link) {
 
+		if (!client->mapped)
+			continue;
+
 		/* TODO: set geometry to 0,0 instead of shifting coordinates */
 		geo_x = client->xdg_surface->geometry.x;
 		geo_y = client->xdg_surface->geometry.y;
@@ -259,6 +274,52 @@ void client_close(struct jwc_client *client)
 		wlr_xdg_surface_v6_send_close(surface);
 }
 
+void client_set_maximazed(struct jwc_client *client, bool maximized)
+{
+	if (maximized == true) {
+		/* save current coordinates */
+		client_get_geometry(client, &client->orig);
+
+		/* get the current output geometry of the client */
+		struct wlr_box output_geo;
+		output_get_output_geo_at(client->server, client->orig.x, client->orig.y,
+					 &output_geo);
+
+		/* maximized client to the corresponding output */
+		client_move_resize(client, 0, 0, output_geo.width, output_geo.height);
+	} else {
+		/* restore origin coordinates */
+		client_move_resize(client, client->orig.x, client->orig.y,
+				   client->orig.width, client->orig.height);
+	}
+
+	wlr_xdg_toplevel_v6_set_maximized(client->xdg_surface, maximized);
+	client->maximized = maximized;
+}
+
+void client_set_fullscreen(struct jwc_client *client, bool fullscreen)
+{
+	if (fullscreen == true) {
+		/* save current coordinates */
+		client_get_geometry(client, &client->orig);
+
+		/* get the current output geometry of the client */
+		struct wlr_box output_geo;
+		output_get_output_geo_at(client->server, client->orig.x, client->orig.y,
+					 &output_geo);
+
+		/* maximized client to the corresponding output */
+		client_move_resize(client, output_geo.x, output_geo.y,
+				   output_geo.width, output_geo.height);
+	} else {
+		/* restore origin coordinates */
+		client_move_resize(client, client->orig.x, client->orig.y,
+				   client->orig.width, client->orig.height);
+	}
+
+	wlr_xdg_toplevel_v6_set_fullscreen(client->xdg_surface, fullscreen);
+	client->fullscreen = fullscreen;
+}
 
 void client_move(struct jwc_client *client, double x, double y)
 {
