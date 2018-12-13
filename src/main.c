@@ -56,7 +56,8 @@ static void wlroots_init(struct jwc_server *server)
 	wlr_renderer_init_wl_display(server->renderer, server->wl_display);
 
 	/* allocate new compositor and add global to the display*/
-	wlr_compositor_create(server->wl_display, server->renderer);
+	server->compositor = wlr_compositor_create(server->wl_display,
+						   server->renderer);
 
 	/* allocate new seat and add global to the display*/
 	server->seat = wlr_seat_create(server->wl_display, "seat0");
