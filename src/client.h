@@ -29,14 +29,35 @@ struct jwc_client {
 	/* index in clients list */
 	struct wl_list link;
 
-	/* xdg shell v6 surface */
-	struct wlr_xdg_surface_v6 *xdg_surface;
+	/* surface ressources */
+	struct wlr_surface *surface;
+	union {
+		struct wlr_xdg_surface_v6 *xdg_surface_v6;
+		struct wlr_xwayland_surface *xwayland_surface;
+	};
+
+	/* surface features */
+	void (*close)(struct jwc_client *client);
+	void (*move)(struct jwc_client *client, double x, double y);
+	void (*resize)(struct jwc_client *client, double width, double height);
+	void (*move_resize)(struct jwc_client *client, double x, double y,
+			    double width, double height);
+	void (*set_activated)(struct jwc_client *client, bool activated);
+	void (*set_maximized)(struct jwc_client *client, bool maximized);
+	void (*set_fullscreen)(struct jwc_client *client, bool fullscreen);
+	void (*get_geometry)(struct jwc_client *client, struct wlr_box *box);
+	struct wlr_surface *(*surface_at)(struct jwc_client *client,
+					 double sx, double sy,
+					 double *sub_x, double *sub_y);
+	void (*for_each_surface)(struct jwc_client *client,
+				 wlr_surface_iterator_func_t iterator,
+				 void *user_data);
 
 	/* Wayland listeners */
 	struct wl_listener map;
-	struct wl_listener unmap;
 	struct wl_listener destroy;
 	struct wl_listener surface_commit;
+	struct wl_listener request_configure;
 
 	/* client ressources */
 	double x, y;
@@ -56,6 +77,12 @@ void client_init(struct jwc_server *server);
  */
 struct jwc_client *client_get_focus(struct jwc_server *server);
 void client_set_focus(struct jwc_client *client);
+
+/**
+ * TODO
+ */
+struct wlr_surface *client_surface_at(struct jwc_client *client, double sx, double sy,
+				      double *sub_x, double *sub_y);
 
 /**
  * TODO

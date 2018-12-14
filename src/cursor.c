@@ -40,11 +40,10 @@ static void cursor_motion_handle(struct jwc_server *server, double x, double y, 
 		if (focus != NULL) {
 			/* surface-local coordinates */
 			double sx, sy;
-			struct wlr_surface *surface =
-				wlr_xdg_surface_v6_surface_at(focus->xdg_surface,
-							      x - focus->x,
-							      y - focus->y,
-							      &sx, &sy);
+			struct wlr_surface *surface = client_surface_at(focus,
+									x - focus->x,
+									y - focus->y,
+									&sx, &sy);
 
 			/* TODO */
 			wlr_seat_pointer_notify_enter(server->seat, surface, sx, sy);

@@ -105,6 +105,7 @@ int main(void)
 	wl_display_run(server.wl_display);
 
 	/* free resources */
+	wlr_xwayland_destroy(server.xwayland);
 	wl_display_destroy_clients(server.wl_display);
 	wl_display_destroy(server.wl_display);
 

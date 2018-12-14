@@ -38,6 +38,7 @@
 #include <wlr/types/wlr_xdg_output_v1.h>
 #include <wlr/types/wlr_xdg_shell_v6.h>
 #include <wlr/util/log.h>
+#include <wlr/xwayland.h>
 
 struct jwc_server {
 	/* Wayland resources */
@@ -75,8 +76,9 @@ struct jwc_server {
 	/* clients resources */
 	struct wl_list clients;
 	struct wlr_xdg_shell_v6 *xdg_shell_v6;
-	struct wl_listener xdg_shell_v6_surface;
-	struct wl_listener new_client;
+	struct wlr_xwayland *xwayland;
+	struct wl_listener xdg_shell_v6_new_surface;
+	struct wl_listener xwayland_new_surface;
 };
 
 #endif
