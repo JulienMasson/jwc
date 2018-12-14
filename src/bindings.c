@@ -179,6 +179,11 @@ bool bindings_keyboard(struct jwc_server *server, xkb_keysym_t syms)
 			client_close(focus);
 		break;
 
+	case XKB_KEY_e:
+		if (fork() == 0)
+			execl("/bin/sh", "/bin/sh", "-c", "emacs", (void *)NULL);
+		break;
+
 	case XKB_KEY_f:
 		focus = client_get_focus(server);
 		if (focus != NULL) {
