@@ -173,9 +173,6 @@ static void xwayland_new_surface_event(struct wl_listener *listener, void *data)
 
 	client->request_configure.notify = xwayland_request_configure_event;
 	wl_signal_add(&xwayland_surface->events.request_configure, &client->request_configure);
-
-	/* add this client to the clients server list */
-	wl_list_insert(&server->clients, &client->link);
 }
 
 void xwayland_init(struct jwc_server *server)

@@ -58,6 +58,11 @@ static void render_surface(struct wlr_surface *surface, int sx, int sy, void *da
 
 void client_setup(struct jwc_client *client)
 {
+	struct jwc_server *server = client->server;
+
+	/* add this client to the clients server list */
+	wl_list_insert(&server->clients, &client->link);
+
 	/* focus and show on toplevel */
 	client_set_focus(client);
 	client_set_on_toplevel(client);

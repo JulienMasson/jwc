@@ -170,9 +170,6 @@ static void xdg_shell_v6_new_surface_event(struct wl_listener *listener, void *d
 
 	client->destroy.notify = client_destroy_event;
 	wl_signal_add(&xdg_surface_v6->events.destroy, &client->destroy);
-
-	/* add this client to the clients server list */
-	wl_list_insert(&server->clients, &client->link);
 }
 
 void xdg_shell_v6_init(struct jwc_server *server)
