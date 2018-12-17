@@ -127,10 +127,13 @@ static void xwayland_map_event(struct wl_listener *listener, void *data)
 	client->surface_at = xwayland_surface_surface_at;
 	client->for_each_surface = xwayland_surface_for_each_surface;
 
-	/* register callback for surface commit event */
+	/* register callback for destroy and surface commit event */
 	client->surface_commit.notify = xwayland_surface_commit_event;
 	wl_signal_add(&client->surface->events.commit,
 		      &client->surface_commit);
+
+	client->destroy.notify = client_destroy_event;
+	wl_signal_add(&xwayland_surface->events.destroy, &client->destroy);
 
 	client_setup(client);
 }
@@ -167,9 +170,6 @@ static void xwayland_new_surface_event(struct wl_listener *listener, void *data)
 	/* register callbacks when we get events from this client */
 	client->map.notify = xwayland_map_event;
 	wl_signal_add(&xwayland_surface->events.map, &client->map);
-
-	client->destroy.notify = client_destroy_event;
-	wl_signal_add(&xwayland_surface->events.destroy, &client->destroy);
 
 	client->request_configure.notify = xwayland_request_configure_event;
 	wl_signal_add(&xwayland_surface->events.request_configure, &client->request_configure);
