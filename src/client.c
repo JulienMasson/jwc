@@ -212,6 +212,7 @@ static void xdg_shell_v6_new_surface_event(struct wl_listener *listener, void *d
 		return;
 
 	/* create new client */
+	INFO("New XDG shell V6 client: %s", xdg_surface_v6->toplevel->title);
 	struct jwc_client *client = calloc(1, sizeof(struct jwc_client));
 	client->server = server;
 	client->xdg_surface_v6 = xdg_surface_v6;
@@ -364,6 +365,7 @@ static void xwayland_new_surface_event(struct wl_listener *listener, void *data)
 	wlr_xwayland_surface_ping(xwayland_surface);
 
 	/* create new client */
+	INFO("New xwayland client: %s", xwayland_surface->title);
 	struct jwc_client *client = calloc(1, sizeof(struct jwc_client));
 	if (!client)
 		return;
@@ -659,7 +661,7 @@ void client_render_all(struct jwc_server *server, struct wlr_output *output,
 		if (!client->mapped)
 			continue;
 
-		/* update xdg shell v6 surface of the client */
+		/* update surface of the client */
 		rdata.client = client;
 		client->for_each_surface(client, render_surface, &rdata);
 	}
