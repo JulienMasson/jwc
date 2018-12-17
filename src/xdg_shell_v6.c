@@ -143,6 +143,9 @@ static void xdg_surface_v6_map_event(struct wl_listener *listener, void *data)
 	wl_signal_add(&client->surface->events.commit,
 		      &client->surface_commit);
 
+	client->destroy.notify = client_destroy_event;
+	wl_signal_add(&client->xdg_surface_v6->events.destroy, &client->destroy);
+
 	client_setup(client);
 }
 
@@ -167,9 +170,6 @@ static void xdg_shell_v6_new_surface_event(struct wl_listener *listener, void *d
 	/* register callbacks when we get events from this client */
 	client->map.notify = xdg_surface_v6_map_event;
 	wl_signal_add(&xdg_surface_v6->events.map, &client->map);
-
-	client->destroy.notify = client_destroy_event;
-	wl_signal_add(&xdg_surface_v6->events.destroy, &client->destroy);
 }
 
 void xdg_shell_v6_init(struct jwc_server *server)
