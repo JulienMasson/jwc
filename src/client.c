@@ -77,10 +77,33 @@ void client_setup(struct jwc_client *client)
 	client->mapped = true;
 }
 
+static bool client_exist(struct jwc_server *server, struct jwc_client *client)
+{
+	struct wl_list *clients = &server->clients;
+	if (wl_list_empty(clients))
+		return NULL;
+
+	struct jwc_client *tmp;
+	wl_list_for_each(tmp, clients, link) {
+		if (&tmp->link == &client->link)
+			return true;
+	}
+
+	return false;
+}
+
+static void client_safe_remove(struct jwc_client *client)
+{
+	if (client_exist(client->server, client))
+		wl_list_remove(&client->link);
+	else
+		INFO("Client not found");
+}
+
 void client_destroy_event(struct wl_listener *listener, void *data)
 {
 	struct jwc_client *client = wl_container_of(listener, client, destroy);
-	wl_list_remove(&client->link);
+	client_safe_remove(client);
 	free(client);
 }
 
