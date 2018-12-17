@@ -71,6 +71,8 @@ struct jwc_client {
  * Init several wayland protocols to accept new client
  */
 void client_init(struct jwc_server *server);
+void client_setup(struct jwc_client *client);
+void client_destroy_event(struct wl_listener *listener, void *data);
 
 /**
  * TODO
