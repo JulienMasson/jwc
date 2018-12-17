@@ -94,6 +94,9 @@ int main(void)
 	}
 	setenv("WAYLAND_DISPLAY", socket, true);
 
+	/* default gtk theme */
+	setenv("GTK_THEME", "Adwaita:dark", true);
+
 	/* start wlroots backend */
 	if (!wlr_backend_start(server.backend)) {
 		wlr_backend_destroy(server.backend);
