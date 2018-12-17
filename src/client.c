@@ -213,6 +213,8 @@ static void xdg_shell_v6_new_surface_event(struct wl_listener *listener, void *d
 
 	/* create new client */
 	INFO("New XDG shell V6 client: %s", xdg_surface_v6->toplevel->title);
+	wlr_xdg_surface_v6_ping(xdg_surface_v6);
+
 	struct jwc_client *client = calloc(1, sizeof(struct jwc_client));
 	client->server = server;
 	client->xdg_surface_v6 = xdg_surface_v6;
