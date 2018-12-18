@@ -54,7 +54,7 @@ static void cursor_motion_handle(struct jwc_server *server, double x, double y, 
 	}
 }
 
-static void cursor_motion(struct wl_listener *listener, void *data)
+static void cursor_motion_event(struct wl_listener *listener, void *data)
 {
 	struct jwc_server *server = wl_container_of(listener, server, cursor_motion);
 	struct wlr_cursor *cursor = server->cursor;
@@ -68,7 +68,7 @@ static void cursor_motion(struct wl_listener *listener, void *data)
 	cursor_motion_handle(server, x, y, event->time_msec);
 }
 
-static void cursor_motion_absolute(struct wl_listener *listener, void *data)
+static void cursor_motion_absolute_event(struct wl_listener *listener, void *data)
 {
 	struct jwc_server *server = wl_container_of(listener, server, cursor_motion_absolute);
 	struct wlr_event_pointer_motion_absolute *event = data;
@@ -81,7 +81,7 @@ static void cursor_motion_absolute(struct wl_listener *listener, void *data)
 	cursor_motion_handle(server, x, y, event->time_msec);
 }
 
-static void cursor_button(struct wl_listener *listener, void *data)
+static void cursor_button_event(struct wl_listener *listener, void *data)
 {
 	struct jwc_server *server = wl_container_of(listener, server, cursor_button);
 	struct wlr_event_pointer_button *event = data;
@@ -131,16 +131,16 @@ void cursor_init(struct jwc_server *server)
 	wlr_xcursor_manager_load(server->cursor_mgr, 1);
 
 	/* register callback when we receive relative motion event */
-	server->cursor_motion.notify = cursor_motion;
+	server->cursor_motion.notify = cursor_motion_event;
 	wl_signal_add(&server->cursor->events.motion, &server->cursor_motion);
 
 	/* register callback when we receive absolute motion event */
-	server->cursor_motion_absolute.notify = cursor_motion_absolute;
+	server->cursor_motion_absolute.notify = cursor_motion_absolute_event;
 	wl_signal_add(&server->cursor->events.motion_absolute,
 		      &server->cursor_motion_absolute);
 
 	/* register callback when we receive cursor button event */
-	server->cursor_button.notify = cursor_button;
+	server->cursor_button.notify = cursor_button_event;
 	wl_signal_add(&server->cursor->events.button, &server->cursor_button);
 }
 
