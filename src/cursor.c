@@ -117,6 +117,14 @@ static void cursor_button_event(struct wl_listener *listener, void *data)
 
 }
 
+static void cursor_axis_event(struct wl_listener *listener, void *data)
+{
+	struct jwc_server *server = wl_container_of(listener, server, cursor_axis);
+	struct wlr_event_pointer_axis *event = data;
+	wlr_seat_pointer_notify_axis(server->seat, event->time_msec, event->orientation,
+				     event->delta, event->delta_discrete, event->source);
+}
+
 void cursor_init(struct jwc_server *server)
 {
 	server->cursor = wlr_cursor_create();
@@ -142,6 +150,10 @@ void cursor_init(struct jwc_server *server)
 	/* register callback when we receive cursor button event */
 	server->cursor_button.notify = cursor_button_event;
 	wl_signal_add(&server->cursor->events.button, &server->cursor_button);
+
+	/* register callback when we receive cursor axis event */
+	server->cursor_axis.notify = cursor_axis_event;
+	wl_signal_add(&server->cursor->events.axis, &server->cursor_axis);
 }
 
 void cursor_new(struct jwc_server *server, struct wlr_input_device *device)
