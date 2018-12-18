@@ -65,6 +65,7 @@ struct jwc_client {
 	struct wlr_box pending_geo;
 	uint32_t pending_serial;
 	bool mapped, maximized, fullscreen;
+	float alpha;
 };
 
 /**

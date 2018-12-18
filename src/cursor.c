@@ -27,7 +27,7 @@ static void cursor_motion_handle(struct jwc_server *server, double x, double y, 
 	bool handle;
 
 	/* handle if there is a cursor bindings to apply */
-	handle = bindings_cursor(server, x, y);
+	handle = bindings_cursor_motion(server, x, y);
 
 	/* if no cursor bindings has been handled:
 	 * set default image and move cursor
@@ -85,35 +85,36 @@ static void cursor_button(struct wl_listener *listener, void *data)
 {
 	struct jwc_server *server = wl_container_of(listener, server, cursor_button);
 	struct wlr_event_pointer_button *event = data;
+	bool handle;
 
 	server->cursor_button_left_pressed = false;
 	server->cursor_button_right_pressed = false;
+	server->cursor_button_left_released = false;
+	server->cursor_button_right_released = false;
 
-	/* if the meta key has NOT been pressed, send a button event
-	 * to the surface with pointer focus.
-	 */
-	if (!server->meta_key_pressed)
-		wlr_seat_pointer_notify_button(server->seat, event->time_msec,
-					       event->button, event->state);
-
-	/* check if left or right button has been pressed */
+	/* check if left or right button has been pressed or released */
 	if (event->state == WLR_BUTTON_PRESSED) {
 		if (event->button == BTN_LEFT)
 			server->cursor_button_left_pressed = true;
 		else if (event->button == BTN_RIGHT)
 			server->cursor_button_right_pressed = true;
+	} else if (event->state == WLR_BUTTON_RELEASED) {
+		if (event->button == BTN_LEFT)
+			server->cursor_button_left_released = true;
+		else if (event->button == BTN_RIGHT)
+			server->cursor_button_right_released = true;
 	}
 
-	/* if left button has been pressed show the focus client
-	 * on toplevel of the screen.
+	/* handle if there is a cursor bindings to apply */
+	handle = bindings_cursor_button(server);
+
+	/* if no cursor bindings has been handled:
+	 * send a button event to the surface with pointer focus.
 	 */
-	if (server->cursor_button_left_pressed) {
-		struct jwc_client *focus = client_get_focus(server);
-		if (focus != NULL) {
-			client_set_focus(focus);
-			client_set_on_toplevel(focus);
-		}
-	}
+	if (handle == false)
+		wlr_seat_pointer_notify_button(server->seat, event->time_msec,
+					       event->button, event->state);
+
 }
 
 void cursor_init(struct jwc_server *server)

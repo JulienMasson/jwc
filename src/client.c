@@ -51,7 +51,9 @@ static void render_surface(struct wlr_surface *surface, int sx, int sy, void *da
 	ox += client->x + sx;
 	oy += client->y + sy;
 
-	wlr_render_texture(rdata->renderer, texture, output->transform_matrix, ox, oy, 1);
+	/* render the client texture */
+	wlr_render_texture(rdata->renderer, texture, output->transform_matrix, ox, oy,
+			   client->alpha);
 
 	wlr_surface_send_frame_done(surface, rdata->when);
 }
@@ -59,6 +61,9 @@ static void render_surface(struct wlr_surface *surface, int sx, int sy, void *da
 void client_setup(struct jwc_client *client)
 {
 	struct jwc_server *server = client->server;
+
+	/* by default client has no transparency */
+	client->alpha = 1;
 
 	/* add this client to the clients server list */
 	wl_list_insert(&server->clients, &client->link);

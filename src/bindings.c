@@ -23,6 +23,10 @@
 #include "cursor.h"
 #include "utils.h"
 
+/* action ressources */
+bool action_ongoing;
+struct jwc_client *target;
+
 static void move_cursor_center_client(struct jwc_client *client)
 {
 	struct wlr_box box;
@@ -30,78 +34,100 @@ static void move_cursor_center_client(struct jwc_client *client)
 	cursor_move(client->server, box.x + (box.width / 2), box.y + (box.height / 2));
 }
 
-bool bindings_cursor(struct jwc_server *server, double x, double y)
+bool bindings_cursor_motion(struct jwc_server *server, double x, double y)
 {
-	static struct jwc_client *focus;
-	static bool action_ongoing = false;
 	struct wlr_box box;
 
-	/* if the meta key has been pressed and
-	 * the client is not fullscreen, take some actions.
-	 */
-	if (server->meta_key_pressed) {
+	if (target && action_ongoing == true) {
 
 		/* move client */
 		if (server->cursor_button_left_pressed) {
 
-			if (action_ongoing == false) {
-				/* get focus client */
-				focus = client_get_focus(server);
-				if (focus == NULL || focus->fullscreen)
-					return false;
-			}
-			action_ongoing = true;
+			/* change transparency of the client */
+			target->alpha = 0.7;
 
-			/* calculate focus coordinates based on
+			/* calculate target coordinates based on
 			 * client geometry.
 			 */
-			double focus_x, focus_y;
-			client_get_geometry(focus, &box);
-			focus_x = x - (box.width / 2);
-			focus_y = y - (box.height / 2);
+			double target_x, target_y;
+			client_get_geometry(target, &box);
+			target_x = x - (box.width / 2);
+			target_y = y - (box.height / 2);
 
 			/* move client/cursor */
-			client_move(focus, focus_x, focus_y);
+			client_move(target, target_x, target_y);
 			cursor_set_image(server, "all-scroll");
 			cursor_move(server, x, y);
 
 			/* reset some client ressources */
-			focus->maximized = false;
+			target->maximized = false;
 
 			return true;
+
 		}
 
 		/* resize client */
 		if (server->cursor_button_right_pressed) {
 
-			if (action_ongoing == false) {
-				/* get focus client */
-				focus = client_get_focus(server);
-				if (focus == NULL || focus->fullscreen)
-					return false;
-			}
-			action_ongoing = true;
-
-			/* calculate focus coordinates based on
+			/* calculate target coordinates based on
 			 * client geometry.
 			 */
-			double focus_width, focus_height;
-			client_get_geometry(focus, &box);
-			focus_width = x - box.x;
-			focus_height = y - box.y;
+			double target_width, target_height;
+			client_get_geometry(target, &box);
+			target_width = x - box.x;
+			target_height = y - box.y;
 
 			/* resize client and move cursor */
-			client_resize(focus, focus_width, focus_height);
+			client_resize(target, target_width, target_height);
 			cursor_set_image(server, "bottom_right_corner");
 			cursor_move(server, x - 1, y - 1);
 
 			/* reset some client ressources */
-			focus->maximized = false;
+			target->maximized = false;
 
 			return true;
 		}
-	} else
+	}
+
+	return false;
+}
+
+bool bindings_cursor_button(struct jwc_server *server)
+{
+	struct jwc_client *focus = client_get_focus(server);
+	if (focus == NULL || focus->fullscreen)
+		return false;
+
+	/* if left button has been pressed show the focus client
+	 * on toplevel of the screen.
+	 */
+	if (server->cursor_button_left_pressed) {
+		client_set_focus(focus);
+		client_set_on_toplevel(focus);
+	}
+
+	/* check if need to change action_ongoing state */
+	if (server->meta_key_pressed) {
+
+		/* if left or right button has been pressed:
+		 * an action is ongoing.
+		 */
+		if (server->cursor_button_left_pressed ||
+		    server->cursor_button_right_pressed) {
+			action_ongoing = true;
+			target = focus;
+			return true;
+		}
+	}
+
+	/* if left or right button has been released:
+	 * the current action stop.
+	 */
+	if (server->cursor_button_left_released ||
+	    server->cursor_button_right_released) {
 		action_ongoing = false;
+		focus->alpha = 1;
+	}
 
 	return false;
 }
