@@ -58,30 +58,6 @@ static void render_surface(struct wlr_surface *surface, int sx, int sy, void *da
 	wlr_surface_send_frame_done(surface, rdata->when);
 }
 
-void client_setup(struct jwc_client *client)
-{
-	struct jwc_server *server = client->server;
-
-	/* by default client has no transparency */
-	client->alpha = 1;
-
-	/* add this client to the clients server list */
-	wl_list_insert(&server->clients, &client->link);
-
-	/* focus and show on toplevel */
-	client_set_focus(client);
-	client_set_on_toplevel(client);
-
-	/* move client to have the current pointer center on this client */
-	struct wlr_box box;
-	client_get_geometry(client, &box);
-	client_move(client,
-		    client->server->cursor->x - (box.width / 2),
-		    client->server->cursor->y - (box.height / 2));
-
-	client->mapped = true;
-}
-
 static bool client_exist(struct jwc_server *server, struct jwc_client *client)
 {
 	struct wl_list *clients = &server->clients;
@@ -95,6 +71,31 @@ static bool client_exist(struct jwc_server *server, struct jwc_client *client)
 	}
 
 	return false;
+}
+
+void client_setup(struct jwc_client *client)
+{
+	struct jwc_server *server = client->server;
+
+	/* by default client has no transparency */
+	client->alpha = 1;
+
+	/* add this client to the clients server list */
+	if (!client_exist(server, client))
+		wl_list_insert(&server->clients, &client->link);
+
+	/* focus and show on toplevel */
+	client_set_focus(client);
+	client_set_on_toplevel(client);
+
+	/* move client to have the current pointer center on this client */
+	struct wlr_box box;
+	client_get_geometry(client, &box);
+	client_move(client,
+		    client->server->cursor->x - (box.width / 2),
+		    client->server->cursor->y - (box.height / 2));
+
+	client->mapped = true;
 }
 
 static void client_safe_remove(struct jwc_client *client)
