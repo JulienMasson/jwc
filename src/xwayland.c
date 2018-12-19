@@ -105,6 +105,12 @@ static void xwayland_surface_commit_event(struct wl_listener *listener, void *da
 	}
 }
 
+static void xwayland_unmap_event(struct wl_listener *listener, void *data)
+{
+	struct jwc_client *client = wl_container_of(listener, client, unmap);
+	client->mapped = false;
+}
+
 static void xwayland_map_event(struct wl_listener *listener, void *data)
 {
 	struct jwc_client *client = wl_container_of(listener, client, map);
@@ -133,6 +139,8 @@ static void xwayland_map_event(struct wl_listener *listener, void *data)
 		      &client->surface_commit);
 
 	client->destroy.notify = client_destroy_event;
+	client->unmap.notify = xwayland_unmap_event;
+	wl_signal_add(&xwayland_surface->events.unmap, &client->unmap);
 	wl_signal_add(&xwayland_surface->events.destroy, &client->destroy);
 
 	client_setup(client);

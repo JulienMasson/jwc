@@ -119,6 +119,12 @@ static void xdg_surface_v6_commit_event(struct wl_listener *listener, void *data
 	}
 }
 
+static void xdg_surface_v6_unmap_event(struct wl_listener *listener, void *data)
+{
+	struct jwc_client *client = wl_container_of(listener, client, unmap);
+	client->mapped = false;
+}
+
 static void xdg_surface_v6_map_event(struct wl_listener *listener, void *data)
 {
 	struct jwc_client *client = wl_container_of(listener, client, map);
@@ -142,6 +148,9 @@ static void xdg_surface_v6_map_event(struct wl_listener *listener, void *data)
 	client->surface_commit.notify = xdg_surface_v6_commit_event;
 	wl_signal_add(&client->surface->events.commit,
 		      &client->surface_commit);
+
+	client->unmap.notify = xdg_surface_v6_unmap_event;
+	wl_signal_add(&client->xdg_surface_v6->events.unmap, &client->unmap);
 
 	client->destroy.notify = client_destroy_event;
 	wl_signal_add(&client->xdg_surface_v6->events.destroy, &client->destroy);
