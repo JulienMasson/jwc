@@ -111,6 +111,10 @@ void client_center_on_cursor(struct jwc_client *client)
 void client_destroy_event(struct wl_listener *listener, void *data)
 {
 	struct jwc_client *client = wl_container_of(listener, client, destroy);
+	wl_list_remove(&client->map.link);
+	wl_list_remove(&client->unmap.link);
+	wl_list_remove(&client->destroy.link);
+	wl_list_remove(&client->surface_commit.link);
 	client_safe_remove(client);
 	free(client);
 }
