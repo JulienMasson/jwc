@@ -88,13 +88,6 @@ void client_setup(struct jwc_client *client)
 	client_set_focus(client);
 	client_set_on_toplevel(client);
 
-	/* move client to have the current pointer center on this client */
-	struct wlr_box box;
-	client_get_geometry(client, &box);
-	client_move(client,
-		    client->server->cursor->x - (box.width / 2),
-		    client->server->cursor->y - (box.height / 2));
-
 	client->mapped = true;
 }
 
@@ -104,6 +97,15 @@ static void client_safe_remove(struct jwc_client *client)
 		wl_list_remove(&client->link);
 	else
 		INFO("Client not found");
+}
+
+void client_center_on_cursor(struct jwc_client *client)
+{
+	struct wlr_box box;
+	client_get_geometry(client, &box);
+	client_move(client,
+		    client->server->cursor->x - (box.width / 2),
+		    client->server->cursor->y - (box.height / 2));
 }
 
 void client_destroy_event(struct wl_listener *listener, void *data)

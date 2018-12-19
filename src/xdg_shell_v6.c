@@ -147,6 +147,7 @@ static void xdg_surface_v6_map_event(struct wl_listener *listener, void *data)
 	wl_signal_add(&client->xdg_surface_v6->events.destroy, &client->destroy);
 
 	client_setup(client);
+	client_center_on_cursor(client);
 }
 
 static void xdg_shell_v6_new_surface_event(struct wl_listener *listener, void *data)

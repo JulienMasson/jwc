@@ -73,6 +73,7 @@ struct jwc_client {
  */
 void client_init(struct jwc_server *server);
 void client_setup(struct jwc_client *client);
+void client_center_on_cursor(struct jwc_client *client);
 void client_destroy_event(struct wl_listener *listener, void *data);
 
 /**
