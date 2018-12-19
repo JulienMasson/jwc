@@ -136,7 +136,8 @@ static void xwayland_map_event(struct wl_listener *listener, void *data)
 	wl_signal_add(&xwayland_surface->events.destroy, &client->destroy);
 
 	client_setup(client);
-	client_center_on_cursor(client);
+	if (!xwayland_surface->override_redirect)
+		client_center_on_cursor(client);
 }
 
 static void xwayland_request_configure_event(struct wl_listener *listener, void *data)
