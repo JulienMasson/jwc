@@ -134,6 +134,7 @@ bool bindings_cursor_button(struct jwc_server *server)
 
 bool bindings_keyboard(struct jwc_server *server, xkb_keysym_t syms)
 {
+	static bool primary_output_enabled = true;
 	struct jwc_client *focus;
 	bool handle = true;
 
@@ -237,6 +238,11 @@ bool bindings_keyboard(struct jwc_server *server, xkb_keysym_t syms)
 			client_set_maximazed(focus, !focus->maximized);
 			move_cursor_center_client(focus);
 		}
+		break;
+
+	case XKB_KEY_p:
+		primary_output_enabled = !primary_output_enabled;
+		output_enable(server, DEFAULT_PRIMARY_OUTPUT, primary_output_enabled);
 		break;
 
 	default:

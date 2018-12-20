@@ -21,8 +21,6 @@
 #include "client.h"
 #include "utils.h"
 
-#define DEFAULT_PRIMARY_OUTPUT "eDP-1"
-
 struct jwc_output {
 	/* pointer to compositor server */
 	struct jwc_server *server;

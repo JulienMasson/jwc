@@ -22,6 +22,8 @@
 
 #include "server.h"
 
+#define DEFAULT_PRIMARY_OUTPUT "eDP-1"
+
 /**
  * TODO
  */
