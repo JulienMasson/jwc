@@ -89,6 +89,7 @@ void client_setup(struct jwc_client *client)
 	client_set_on_toplevel(client);
 
 	client->mapped = true;
+	client->visible = true;
 }
 
 static void client_safe_remove(struct jwc_client *client)
@@ -206,16 +207,16 @@ struct jwc_client *client_get_last(struct jwc_server *server)
 		return NULL;
 
 	wl_list_for_each_reverse(client, clients, link) {
-		if (client->mapped == true)
+		if ((client->mapped == true) && (client->visible == true))
 			return client;
 	}
 
 	return NULL;
 }
 
-void client_unmap(struct jwc_client *client)
+void client_set_invisible(struct jwc_client *client)
 {
-	client->mapped = false;
+	client->visible = false;
 
 	struct jwc_client *last = client_get_last(client->server);
 	if (last) {
@@ -244,7 +245,7 @@ struct jwc_client *client_get_focus(struct jwc_server *server)
 	struct wlr_box box;
 	wl_list_for_each(client, clients, link) {
 
-		if (!client->mapped)
+		if (!client->mapped || !client->visible)
 			continue;
 
 		/* intersect */
@@ -383,7 +384,7 @@ void client_render_all(struct jwc_server *server, struct wlr_output *output,
 	wl_list_for_each_reverse(client, clients, link) {
 
 		/* if client is not mapped, no need to render it */
-		if (!client->mapped)
+		if (!client->mapped || !client->visible)
 			continue;
 
 		/* update surface of the client */

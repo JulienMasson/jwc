@@ -66,7 +66,7 @@ struct jwc_client {
 	struct wlr_box orig;
 	struct wlr_box pending_geo;
 	uint32_t pending_serial;
-	bool mapped, maximized, fullscreen;
+	bool mapped, maximized, fullscreen, visible;
 	float alpha;
 };
 
@@ -104,7 +104,7 @@ struct jwc_client *client_get_last(struct jwc_server *server);
 /**
  * TODO
  */
-void client_unmap(struct jwc_client *client);
+void client_set_invisible(struct jwc_client *client);
 
 /**
  * TODO

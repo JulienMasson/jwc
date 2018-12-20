@@ -195,7 +195,7 @@ bool bindings_keyboard(struct jwc_server *server, xkb_keysym_t syms)
 
 	case XKB_KEY_a:
 		wl_list_for_each(focus, &server->clients, link) {
-			focus->mapped = true;
+			focus->visible = true;
 		}
 		break;
 
@@ -222,7 +222,7 @@ bool bindings_keyboard(struct jwc_server *server, xkb_keysym_t syms)
 	case XKB_KEY_h:
 		focus = client_get_focus(server);
 		if (focus != NULL) {
-			client_unmap(focus);
+			client_set_invisible(focus);
 			focus = client_get_on_toplevel(server);
 			if (focus != NULL) {
 				client_set_focus(focus);
