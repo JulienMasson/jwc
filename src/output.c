@@ -36,6 +36,7 @@ struct jwc_output {
 
 	/* output ressources */
 	struct wlr_output *wlr_output;
+	bool enabled;
 };
 
 static void output_render(struct jwc_server *server, struct wlr_output *wlr_output)
@@ -71,7 +72,8 @@ static void output_frame(struct wl_listener *listener, void *data)
 {
 	struct jwc_output *output = wl_container_of(listener, output, frame);
 
-	output_render(output->server, output->wlr_output);
+	if (output->enabled)
+		output_render(output->server, output->wlr_output);
 }
 
 static void output_destroy(struct wl_listener *listener, void *data)
@@ -109,10 +111,8 @@ static struct jwc_output *output_get_primary(struct jwc_server *server)
 	return NULL;
 }
 
-static void output_auto_configure(struct jwc_server *server, struct wlr_output *wlr_output)
+static void output_auto_configure(struct jwc_server *server)
 {
-	wlr_output_layout_add(server->output_layout, wlr_output, 0, 0);
-
 	struct wl_list *outputs = &server->outputs;
 	if (wl_list_empty(outputs))
 		return;
@@ -124,14 +124,39 @@ static void output_auto_configure(struct jwc_server *server, struct wlr_output *
 		wl_list_insert(outputs, &primary->link);
 	}
 
-	/* TODO */
+	/* auto detect if we need to add/remove output in layout */
 	struct jwc_output *output;
-	int32_t width = 0;
-	wl_list_for_each_reverse(output, outputs, link) {
-		wlr_output_layout_move(server->output_layout, output->wlr_output, width, 0);
-		width += output->wlr_output->width;
+	wl_list_for_each(output, outputs, link) {
+
+		if (output->enabled) {
+			/* check if this output is already in layout */
+			if (wlr_output_layout_get(server->output_layout, output->wlr_output))
+				continue;
+
+			wlr_output_layout_add(server->output_layout, output->wlr_output,
+					      0, 0);
+		} else {
+			/* check if this output is NOT in layout */
+			if (!wlr_output_layout_get(server->output_layout, output->wlr_output))
+				continue;
+
+			wlr_output_layout_remove(server->output_layout, output->wlr_output);
+		}
 	}
 
+	/* all the output are moved from the left to the right.
+	 * the primary output is placed at the "most" right.
+	 */
+	int32_t width = 0;
+	wl_list_for_each_reverse(output, outputs, link) {
+		if (output->enabled) {
+			wlr_output_layout_move(server->output_layout, output->wlr_output,
+					       width, 0);
+			width += output->wlr_output->width;
+		}
+	}
+
+	/* update client coordinates if needed */
 	client_update_all(server);
 }
 
@@ -151,6 +176,7 @@ static void output_notify_new(struct wl_listener *listener, void *data)
 	struct jwc_output *output = calloc(1, sizeof(struct jwc_output));
 	output->server = server;
 	output->wlr_output = wlr_output;
+	output->enabled = true;
 
 	/* register callback when we get frame events from this output */
 	output->frame.notify = output_frame;
@@ -164,7 +190,7 @@ static void output_notify_new(struct wl_listener *listener, void *data)
 	wl_list_insert(&server->outputs, &output->link);
 
 	/* auto configure output */
-	output_auto_configure(server, wlr_output);
+	output_auto_configure(server);
 
 	/* create a global of this output */
 	wlr_output_create_global(wlr_output);
@@ -209,4 +235,21 @@ void output_init(struct jwc_server *server)
 
 	/* create layout, it will be used to describe how the screens are organized */
 	server->output_layout = wlr_output_layout_create();
+}
+
+void output_enable(struct jwc_server *server, const char *name, bool enabled)
+{
+	struct wl_list *outputs = &server->outputs;
+	if (wl_list_empty(outputs))
+		return;
+
+	struct jwc_output *output;
+	wl_list_for_each(output, outputs, link) {
+		if (!strcmp(output->wlr_output->name, name)) {
+			wlr_output_enable(output->wlr_output, enabled);
+			output->enabled = enabled;
+		}
+	}
+
+	output_auto_configure(server);
 }
