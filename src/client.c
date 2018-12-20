@@ -149,6 +149,10 @@ void client_set_focus(struct jwc_client *client)
 	struct wlr_surface *surface = client->surface;
 	struct wlr_seat *seat = client->server->seat;
 
+	/* check if the client can have focus */
+	if (client->is_focusable && !client->is_focusable(client))
+		return;
+
 	/* already focused */
 	struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
 	if (prev_surface == surface)

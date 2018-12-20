@@ -52,6 +52,7 @@ struct jwc_client {
 	void (*for_each_surface)(struct jwc_client *client,
 				 wlr_surface_iterator_func_t iterator,
 				 void *user_data);
+	bool (*is_focusable)(struct jwc_client *client);
 
 	/* Wayland listeners */
 	struct wl_listener map;

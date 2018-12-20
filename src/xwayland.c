@@ -118,6 +118,11 @@ static void xwayland_unmap_event(struct wl_listener *listener, void *data)
 	client->mapped = false;
 }
 
+static bool xwayland_is_focusable(struct jwc_client *client)
+{
+	return wlr_xwayland_or_surface_wants_focus(client->xwayland_surface);
+}
+
 static void xwayland_map_event(struct wl_listener *listener, void *data)
 {
 	struct jwc_client *client = wl_container_of(listener, client, map);
@@ -139,6 +144,7 @@ static void xwayland_map_event(struct wl_listener *listener, void *data)
 	client->get_geometry = xwayland_surface_get_geometry;
 	client->surface_at = xwayland_surface_surface_at;
 	client->for_each_surface = xwayland_surface_for_each_surface;
+	client->is_focusable = xwayland_is_focusable;
 
 	/* register callback for destroy and surface commit event */
 	client->surface_commit.notify = xwayland_surface_commit_event;
