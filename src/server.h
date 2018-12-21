@@ -66,6 +66,7 @@ struct jwc_server {
 	struct wl_listener cursor_motion_absolute;
 	struct wl_listener cursor_button;
 	struct wl_listener cursor_axis;
+	struct wl_listener request_set_cursor;
 	bool cursor_button_left_pressed;
 	bool cursor_button_left_released;
 	bool cursor_button_right_pressed;

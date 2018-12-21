@@ -128,6 +128,22 @@ static void cursor_axis_event(struct wl_listener *listener, void *data)
 				     event->delta, event->delta_discrete, event->source);
 }
 
+static void cursor_request_set_cursor_event(struct wl_listener *listener, void *data)
+{
+	struct jwc_server *server = wl_container_of(listener, server, request_set_cursor);
+	struct wlr_seat_pointer_request_set_cursor_event *event = data;
+	struct wlr_surface *focused_surface =
+		event->seat_client->seat->pointer_state.focused_surface;
+
+	/* check if this event match with the focus surface */
+	struct jwc_client *focus = client_get_focus(server);
+	if (focus != NULL) {
+		if (focused_surface == focus->surface)
+			wlr_cursor_set_surface(server->cursor, event->surface,
+					       event->hotspot_x, event->hotspot_y);
+	}
+}
+
 void cursor_init(struct jwc_server *server)
 {
 	server->cursor = wlr_cursor_create();
@@ -157,6 +173,10 @@ void cursor_init(struct jwc_server *server)
 	/* register callback when we receive cursor axis event */
 	server->cursor_axis.notify = cursor_axis_event;
 	wl_signal_add(&server->cursor->events.axis, &server->cursor_axis);
+
+	/* register callback when we receive request set cursor event */
+	server->request_set_cursor.notify = cursor_request_set_cursor_event;
+	wl_signal_add(&server->seat->events.request_set_cursor, &server->request_set_cursor);
 }
 
 void cursor_new(struct jwc_server *server, struct wlr_input_device *device)
