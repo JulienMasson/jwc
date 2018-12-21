@@ -1,3 +1,5 @@
+[[https://travis-ci.org/JulienMasson/jwc.svg?branch=master][https://travis-ci.org/JulienMasson/jwc.svg?branch=master]]
+
 *jwc* is a minimalist floating [[http://wayland.freedesktop.org/][Wayland]] compositor based on [[https://github.com/swaywm/wlroots][wlroots]].
 
 It has been designed for my needs (currently WIP).
