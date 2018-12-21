@@ -26,7 +26,7 @@
 /**
  * TODO
  */
-bool bindings_cursor_motion(struct jwc_server *server, double x, double y);
+bool bindings_cursor_motion(struct jwc_server *server, double *x, double *y);
 bool bindings_cursor_button(struct jwc_server *server);
 
 /**

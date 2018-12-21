@@ -34,7 +34,7 @@ static void move_cursor_center_client(struct jwc_client *client)
 	cursor_move(client->server, box.x + (box.width / 2), box.y + (box.height / 2));
 }
 
-bool bindings_cursor_motion(struct jwc_server *server, double x, double y)
+bool bindings_cursor_motion(struct jwc_server *server, double *x, double *y)
 {
 	struct wlr_box box;
 
@@ -51,13 +51,12 @@ bool bindings_cursor_motion(struct jwc_server *server, double x, double y)
 			 */
 			double target_x, target_y;
 			client_get_geometry(target, &box);
-			target_x = x - (box.width / 2);
-			target_y = y - (box.height / 2);
+			target_x = *x - (box.width / 2);
+			target_y = *y - (box.height / 2);
 
 			/* move client/cursor */
 			client_move(target, target_x, target_y);
 			cursor_set_image(server, "all-scroll");
-			cursor_move(server, x, y);
 
 			/* reset some client ressources */
 			target->maximized = false;
@@ -74,13 +73,14 @@ bool bindings_cursor_motion(struct jwc_server *server, double x, double y)
 			 */
 			double target_width, target_height;
 			client_get_geometry(target, &box);
-			target_width = x - box.x;
-			target_height = y - box.y;
+			target_width = *x - box.x;
+			target_height = *y - box.y;
 
 			/* resize client and move cursor */
 			client_resize(target, target_width, target_height);
 			cursor_set_image(server, "bottom_right_corner");
-			cursor_move(server, x - 1, y - 1);
+			*x -= 1;
+			*y -= 1;
 
 			/* reset some client ressources */
 			target->maximized = false;

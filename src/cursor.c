@@ -27,14 +27,14 @@ static void cursor_motion_handle(struct jwc_server *server, double x, double y, 
 	bool handle;
 
 	/* handle if there is a cursor bindings to apply */
-	handle = bindings_cursor_motion(server, x, y);
+	handle = bindings_cursor_motion(server, &x, &y);
 
 	/* if no cursor bindings has been handled:
-	 * set default image and move cursor
+	 * set default cursor image, notify and focus on client
 	 */
 	if (handle == false) {
+
 		cursor_set_image(server, "left_ptr");
-		cursor_move(server, x, y);
 
 		struct jwc_client *focus = client_get_focus(server);
 		if (focus != NULL) {
@@ -45,10 +45,8 @@ static void cursor_motion_handle(struct jwc_server *server, double x, double y, 
 									y - focus->y,
 									&sx, &sy);
 
-			/* TODO */
 			wlr_seat_pointer_notify_enter(server->seat, surface, sx, sy);
 			wlr_seat_pointer_notify_motion(server->seat, time, sx, sy);
-
 			client_set_focus(focus);
 		}
 	}
@@ -60,6 +58,9 @@ static void cursor_motion_event(struct wl_listener *listener, void *data)
 	struct wlr_cursor *cursor = server->cursor;
 	struct wlr_event_pointer_motion *event = data;
 	double x, y;
+
+	wlr_cursor_move(server->cursor, server->cursor_input, event->delta_x,
+			event->delta_y);
 
 	/* convert to layout coordinates */
 	x = !isnan(event->delta_x) ? cursor->x + event->delta_x : cursor->x;
@@ -77,6 +78,8 @@ static void cursor_motion_absolute_event(struct wl_listener *listener, void *dat
 	/* convert to layout coordinates */
 	wlr_cursor_absolute_to_layout_coords(server->cursor, server->cursor_input,
 					     event->x, event->y, &x, &y);
+
+	cursor_move(server, x, y);
 
 	cursor_motion_handle(server, x, y, event->time_msec);
 }
