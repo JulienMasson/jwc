@@ -5,7 +5,7 @@ PROTOCOLS_DIR := protocols
 
 # flags
 CFLAGS := -O0 -g -Werror -Wall -Wextra -Wno-unused-parameter
-LDFLAGS := -L/usr/lib -L/usr/lib/x86_64-linux-gnu
+LDFLAGS :=
 
 # libs and include
 pkg_configs := wayland-server \
@@ -16,7 +16,7 @@ LIBS := $(shell pkg-config --libs   ${pkg_configs})
 INCS := $(shell pkg-config --cflags ${pkg_configs})
 
 CFLAGS += -I${SRC_DIR} -I${PROTOCOLS_DIR} ${INCS}
-LDFLAGS += ${LIBS}
+LDFLAGS += ${LIBS} -L/usr/lib -L/usr/lib/x86_64-linux-gnu
 
 # enable unstable wlroots features
 CFLAGS += -DWLR_USE_UNSTABLE
