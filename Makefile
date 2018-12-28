@@ -26,7 +26,7 @@ SRC := $(wildcard $(SRC_DIR)/*.c)
 OBJ := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRC))
 
 # wayland protocols
-WAYLAND_PROTOCOLS := /usr/local/share/wayland-protocols/
+WAYLAND_PROTOCOLS := $(shell pkg-config --variable=pkgdatadir wayland-protocols)
 WAYLAND_XML := $(WAYLAND_PROTOCOLS)/unstable/xdg-shell/xdg-shell-unstable-v6.xml
 WAYLAND_HEADER := $(PROTOCOLS_DIR)/xdg-shell-unstable-v6-protocol.h
 
