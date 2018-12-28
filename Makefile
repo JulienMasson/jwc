@@ -5,7 +5,7 @@ PROTOCOLS_DIR := protocols
 
 # flags
 CFLAGS := -O0 -g -Werror -Wall -Wextra -Wno-unused-parameter
-LDFLAGS :=
+LDFLAGS := -L/usr/lib -L/usr/lib/x86_64-linux-gnu
 
 # libs and include
 pkg_configs := wayland-server \
