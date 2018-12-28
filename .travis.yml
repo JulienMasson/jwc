@@ -3,7 +3,7 @@ dist: xenial
 language: C
 
 install:
-- sudo apt-get update -qq
+- ./tools/install_depencies_travis.sh
 
 script:
 - make
