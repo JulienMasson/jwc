@@ -36,6 +36,7 @@ TARGET := jwc
 all: $(TARGET)
 
 $(WAYLAND_HEADER):
+	mkdir -p $(PROTOCOLS_DIR)
 	wayland-scanner server-header $(WAYLAND_XML) $@
 
 $(OBJ_DIR):
