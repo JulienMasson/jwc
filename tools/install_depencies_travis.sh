@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# set -e
+set -e
 
 # env
-export LD_LIBRARY_PATH="/usr/lib/:$LD_LIBRARY_PATH"
-export PKG_CONFIG_PATH="/usr/lib/pkgconfig/:$PKG_CONFIG_PATH"
+export LD_LIBRARY_PATH="/usr/lib/:/usr/lib/x86_64-linux-gnu/:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="/usr/lib/pkgconfig/:/usr/lib/x86_64-linux-gnu/pkgconfig/:$PKG_CONFIG_PATH"
 
 # dir
 pushd /home/travis/build/
@@ -36,41 +36,6 @@ pushd meson
 git checkout 0.48.1
 sudo python3 setup.py install
 popd
-
-# # glib version 2.56.1
-# git clone https://gitlab.gnome.org/GNOME/glib.git
-# pushd glib
-# git checkout 2.56.1
-# autotools_install
-# popd
-
-# gobject-introspection version 1.54.1
-# git clone https://gitlab.gnome.org/GNOME/gobject-introspection.git
-# pushd gobject-introspection
-# git checkout 1.54.1
-# autotools_install
-# popd
-
-# # harfbuzz version 2.3.0
-# git clone https://github.com/harfbuzz/harfbuzz.git
-# pushd harfbuzz
-# git checkout 2.3.0
-# autotools_install
-# popd
-
-# # pango version 1.41.0
-# git clone https://gitlab.gnome.org/GNOME/pango.git
-# pushd pango
-# git checkout 1.41.0
-# autotools_install
-# popd
-
-# # libepoxy version 1.5.3
-# git clone https://github.com/anholt/libepoxy.git
-# pushd libepoxy
-# git checkout 1.5.3
-# autotools_install
-# popd
 
 # install wayland
 git clone https://gitlab.freedesktop.org/wayland/wayland
