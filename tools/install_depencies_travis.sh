@@ -2,10 +2,6 @@
 
 set -e
 
-# env
-export LD_LIBRARY_PATH="/usr/lib/:/usr/lib/x86_64-linux-gnu/:$LD_LIBRARY_PATH"
-export PKG_CONFIG_PATH="/usr/lib/pkgconfig/:/usr/lib/x86_64-linux-gnu/pkgconfig/:$PKG_CONFIG_PATH"
-
 # dir
 pushd /home/travis/build/
 mkdir deps && cd deps

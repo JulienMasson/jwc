@@ -1,7 +1,18 @@
-sudo: required
 dist: xenial
+sudo: required
 language: C
+compiler: gcc
+
+env:
+  global:
+    - LD_LIBRARY_PATH="/usr/lib/:/usr/lib/x86_64-linux-gnu/"
+    - PKG_CONFIG_PATH="/usr/lib/pkgconfig/:/usr/lib/x86_64-linux-gnu/pkgconfig/"
 
 install: ./tools/install_depencies_travis.sh
 
 script: make
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always
