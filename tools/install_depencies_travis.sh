@@ -58,6 +58,18 @@ pushd libinput
 meson_install
 popd
 
+# install libdrm
+git clone https://gitlab.freedesktop.org/mesa/drm.git libdrm
+pushd libdrm
+meson_install
+popd
+
+# install xcb-xinput
+wget http://ftp.fr.debian.org/debian/pool/main/libx/libxcb/libxcb-xinput0_1.13.1-2_amd64.deb
+sudo dpkg -i libxcb-xinput0_1.13.1-2_amd64.deb
+wget http://ftp.fr.debian.org/debian/pool/main/libx/libxcb/libxcb-xinput-dev_1.13.1-2_amd64.deb
+sudo dpkg -i libxcb-xinput-dev_1.13.1-2_amd64.deb
+
 # libxkbcommon version 0.8.2
 git clone https://github.com/xkbcommon/libxkbcommon.git
 pushd libxkbcommon
