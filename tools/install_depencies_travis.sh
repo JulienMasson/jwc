@@ -8,7 +8,7 @@ mkdir deps && cd deps
 
 # system packages
 sudo apt-get update -qq
-sudo apt-get install git python3 python3-pip ninja-build doxygen xmlto graphviz libudev-dev libmtdev-dev libevdev-dev libwacom-dev libgtk2.0-dev libgtk-3-dev libegl1-mesa-dev libgles2-mesa-dev libpixman-1-dev libxkbcommon-dev libgbm-dev libmount-dev gobject-introspection libgirepository1.0-dev libfribidi-dev libthai-dev gtk-doc-tools xutils-dev libglib2.0-dev libcairo2-dev libgdk-pixbuf2.0-dev libharfbuzz-dev libpango1.0-dev libepoxy-dev check valgrind libxcb1-dev libxcb-composite0-dev libxcb-xfixes0-dev libxcb-image0-dev libxcb-render0-dev libx11-xcb-dev libxcb-icccm4-dev libxcb-xkb-dev -y
+sudo apt-get install git python3 python3-pip ninja-build doxygen xmlto graphviz libudev-dev libmtdev-dev libevdev-dev libwacom-dev libgtk2.0-dev libgtk-3-dev libegl1-mesa-dev libgles2-mesa-dev libpixman-1-dev libxkbcommon-dev libgbm-dev libmount-dev gobject-introspection libgirepository1.0-dev libfribidi-dev libthai-dev gtk-doc-tools xutils-dev libglib2.0-dev libcairo2-dev libgdk-pixbuf2.0-dev libharfbuzz-dev libpango1.0-dev libepoxy-dev check valgrind libxcb1-dev libxcb-composite0-dev libxcb-xfixes0-dev libxcb-image0-dev libxcb-render0-dev libx11-xcb-dev libxcb-icccm4-dev libxcb-xkb-dev libpciaccess-dev -y
 sudo pip3 install --upgrade pip
 sudo pip3 install setuptools sphinx
 sudo pip3 install recommonmark
