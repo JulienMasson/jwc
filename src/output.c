@@ -46,7 +46,7 @@ static void output_render(struct jwc_server *server, struct wlr_output *wlr_outp
 	clock_gettime(CLOCK_MONOTONIC, &now);
 
 	/* make the output rendering context current */
-	if (!wlr_output_make_current(wlr_output, NULL))
+	if (!wlr_output_attach_render(wlr_output, NULL))
 		return;
 
 	/* start rendering on all output frame*/
@@ -61,9 +61,9 @@ static void output_render(struct jwc_server *server, struct wlr_output *wlr_outp
 	/* update all client's surface of this output */
 	client_render_all(server, wlr_output, &now);
 
-	/* Finish rendering and swap buffers */
+	/* Finish rendering */
 	wlr_renderer_end(renderer);
-	wlr_output_swap_buffers(wlr_output, NULL, NULL);
+	wlr_output_commit(wlr_output);
 }
 
 static void output_frame(struct wl_listener *listener, void *data)
