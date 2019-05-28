@@ -2,7 +2,7 @@
  * This file is part of the jwm distribution:
  * https://github.com/JulienMasson/jwc
  *
- * Copyright (c) 2018 Julien Masson.
+ * Copyright (c) 2019 Julien Masson.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +17,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UTILS_H
-#define UTILS_H
+#include <signal.h>
 
-#include "server.h"
+#include "utils.h"
 
-#define ERROR(...)	wlr_log(WLR_ERROR, __VA_ARGS__)
-#define INFO(...)	wlr_log(WLR_INFO, __VA_ARGS__)
-#define DEBUG(...)	wlr_log(WLR_DEBUG, __VA_ARGS__)
-
-void wait_for_debugger(void);
-
-#endif
+void wait_for_debugger(void)
+{
+	raise(SIGSTOP);
+}
