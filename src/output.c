@@ -61,6 +61,9 @@ static void output_render(struct jwc_server *server, struct wlr_output *wlr_outp
 	/* update all client's surface of this output */
 	client_render_all(server, wlr_output, &now);
 
+	/* renders software cursors */
+	wlr_output_render_software_cursors(wlr_output, NULL);
+
 	/* Finish rendering */
 	wlr_renderer_end(renderer);
 	wlr_output_commit(wlr_output);
