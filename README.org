@@ -46,3 +46,13 @@ Get ouputs configuration (equivalent of xrandr):
 #+BEGIN_SRC shell
 swaymsg -t get_outputs
 #+END_SRC
+
+Configure QT with wayland support:
+#+BEGIN_SRC shell
+./configure -confirm-license -opensource -xcb -wayland
+#+END_SRC
+
+Wayland as default for QT app:
+#+BEGIN_SRC shell
+export QT_QPA_PLATFORM=wayland
+#+END_SRC
