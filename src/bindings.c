@@ -94,7 +94,23 @@ bool bindings_cursor_motion(struct jwc_server *server, double *x, double *y)
 
 bool bindings_cursor_button(struct jwc_server *server)
 {
-	struct jwc_client *focus = client_get_focus(server);
+	struct jwc_client *focus;
+
+	if (action_ongoing == true) {
+		/* if left or right button has been released:
+		 * the current action stop.
+		 */
+		if (server->cursor_button_left_released ||
+		    server->cursor_button_right_released) {
+			action_ongoing = false;
+			target->alpha = 1;
+			target = NULL;
+		}
+		return true;
+	}
+
+	/* get focus client */
+	focus = client_get_focus(server);
 	if (focus == NULL || focus->fullscreen)
 		return false;
 
@@ -118,15 +134,6 @@ bool bindings_cursor_button(struct jwc_server *server)
 			target = focus;
 			return true;
 		}
-	}
-
-	/* if left or right button has been released:
-	 * the current action stop.
-	 */
-	if (server->cursor_button_left_released ||
-	    server->cursor_button_right_released) {
-		action_ongoing = false;
-		focus->alpha = 1;
 	}
 
 	return false;
