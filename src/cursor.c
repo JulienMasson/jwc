@@ -48,7 +48,8 @@ static void cursor_motion_handle(struct jwc_server *server, double x, double y, 
 			wlr_seat_pointer_notify_enter(server->seat, surface, sx, sy);
 			wlr_seat_pointer_notify_motion(server->seat, time, sx, sy);
 			client_set_focus(focus);
-		}
+		} else
+			wlr_seat_pointer_clear_focus(server->seat);
 	}
 }
 
